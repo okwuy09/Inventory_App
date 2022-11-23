@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "597345318726",
+    "project_id": "inventory-application-57275",
+    "storage_bucket": "inventory-application-57275.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:597345318726:android:e3e7d12f7090fa0759d747",
+        "android_client_info": {
+          "package_name": "com.example.viicsoft_inventory_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "597345318726-2jjq8005svq50qqcsv48epdb1rimrn9e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ8xBnN35u6fuR66OOsh0acGaJCJmRJps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "597345318726-2jjq8005svq50qqcsv48epdb1rimrn9e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
