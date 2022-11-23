@@ -1,2 +1,2 @@
 # Inventory_App
-Flutter mobile application to take inventory
+Flutter mobile application
