@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/datefield.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/popover.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/component/success_button_sheet.dart';
-import 'package:viicsoft_inventory_app/services/apis/event_api.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 class AddEventPage extends StatefulWidget {
   const AddEventPage({Key? key}) : super(key: key);
@@ -27,7 +27,6 @@ class _AddEventPageState extends State<AddEventPage> {
   final TextEditingController _eventLocation = TextEditingController();
   DateTime startingDate = DateTime.now();
   DateTime endingDate = DateTime.now();
-  final EventAPI _eventAPI = EventAPI();
   bool noImage = false;
 
   final picker = ImagePicker();
@@ -67,6 +66,7 @@ class _AddEventPageState extends State<AddEventPage> {
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
+    var provider = Provider.of<AppData>(context);
     return Scaffold(
       backgroundColor: AppColor.homePageColor,
       body: Form(
@@ -138,7 +138,7 @@ class _AddEventPageState extends State<AddEventPage> {
                               child: Text(
                                 noImage ? 'No image selected !' : '',
                                 style: style.copyWith(
-                                  fontSize: 11,
+                                  fontSize: 12,
                                   color: AppColor.red,
                                 ),
                               ),
@@ -147,7 +147,7 @@ class _AddEventPageState extends State<AddEventPage> {
                             Text(
                               'Event name*',
                               style: style.copyWith(
-                                color: AppColor.darkGrey,
+                                color: AppColor.darkGrey.withOpacity(0.8),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -161,12 +161,12 @@ class _AddEventPageState extends State<AddEventPage> {
                                   (input!.isEmpty) ? "Enter Event Name" : null,
                               labelText: 'Enter event name',
                             ),
-                            SizedBox(height: screenSize.width * 0.015),
+                            SizedBox(height: screenSize.width * 0.02),
                             //
                             Text(
                               'Event type*',
                               style: style.copyWith(
-                                color: AppColor.darkGrey,
+                                color: AppColor.darkGrey.withOpacity(0.8),
                                 fontSize: 11,
                                 fontWeight: FontWeight.w600,
                               ),
@@ -180,13 +180,13 @@ class _AddEventPageState extends State<AddEventPage> {
                                   (input!.isEmpty) ? "Enter Event Type" : null,
                               labelText: 'Enter event type',
                             ),
-                            SizedBox(height: screenSize.width * 0.015),
+                            SizedBox(height: screenSize.width * 0.02),
                             //
                             Text(
                               'Event location*',
                               style: style.copyWith(
                                 fontSize: 11,
-                                color: AppColor.darkGrey,
+                                color: AppColor.darkGrey.withOpacity(0.8),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -200,13 +200,13 @@ class _AddEventPageState extends State<AddEventPage> {
                                   : null,
                               labelText: 'Enter event location',
                             ),
-                            SizedBox(height: screenSize.width * 0.015),
+                            SizedBox(height: screenSize.width * 0.02),
 
                             Text(
                               'Event starting Date',
                               style: style.copyWith(
                                 fontSize: 11,
-                                color: AppColor.darkGrey,
+                                color: AppColor.darkGrey.withOpacity(0.8),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -218,12 +218,12 @@ class _AddEventPageState extends State<AddEventPage> {
                               onPressed: () => _startingDate(context),
                             ),
 
-                            SizedBox(height: screenSize.width * 0.015),
+                            SizedBox(height: screenSize.width * 0.02),
                             Text(
                               'Event ending Date',
                               style: style.copyWith(
                                 fontSize: 11,
-                                color: AppColor.darkGrey,
+                                color: AppColor.darkGrey.withOpacity(0.8),
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
@@ -236,20 +236,22 @@ class _AddEventPageState extends State<AddEventPage> {
                             ),
 
                             //
-                            SizedBox(height: screenSize.width * 0.1),
+                            SizedBox(height: screenSize.width * 0.12),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
                               children: [
                                 MainButton(
                                   borderColor: Colors.transparent,
-                                  child: Text(
-                                    'CREATE EVENT',
-                                    style: style.copyWith(
-                                      fontSize: 14,
-                                      color: AppColor.buttonText,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                  child: provider.isAddingEvent
+                                      ? buttonCircularIndicator
+                                      : Text(
+                                          'CREATE EVENT',
+                                          style: style.copyWith(
+                                            fontSize: 14,
+                                            color: AppColor.buttonText,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                   backgroundColor: AppColor.primaryColor,
                                   onTap: () async {
                                     if (globalFormKey.currentState!
@@ -262,31 +264,14 @@ class _AddEventPageState extends State<AddEventPage> {
                                         setState(() {
                                           noImage = false;
                                         });
-                                      }
-                                      var res = await _eventAPI.addEvent(
-                                          _eventName.text,
-                                          _eventImage!,
-                                          _eventType.text,
-                                          _eventLocation.text,
-                                          endingDate.toString(),
-                                          startingDate.toString());
-
-                                      if (res.statusCode == 200) {
-                                        successButtomSheet(
-                                            context: context,
-                                            buttonText: 'CONTINUE',
-                                            title:
-                                                ' Event Created \n  Successfully!',
-                                            onTap: () =>
-                                                Navigator.pop(context));
-                                      } else {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          const SnackBar(
-                                            backgroundColor: Colors.red,
-                                            content:
-                                                Text("Something went wrong"),
-                                          ),
+                                        await provider.addNewEvent(
+                                          context: context,
+                                          eventName: _eventName.text,
+                                          eventLocation: _eventLocation.text,
+                                          eventType: _eventType.text,
+                                          checkInDate: endingDate,
+                                          checkOutDate: startingDate,
+                                          eventImage: _eventImage!,
                                         );
                                       }
                                     }
@@ -316,11 +301,10 @@ class _AddEventPageState extends State<AddEventPage> {
           alignment: AlignmentDirectional.center,
           children: [
             Container(
-              width: MediaQuery.of(context).size.width * 0.16,
-              height: MediaQuery.of(context).size.width * 0.14,
+              width: MediaQuery.of(context).size.width * 0.18,
+              height: MediaQuery.of(context).size.width * 0.18,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(
-                    MediaQuery.of(context).size.width * 0.02),
+                borderRadius: BorderRadius.circular(20),
                 image: DecorationImage(
                   image: _eventImage != null
                       ? FileImage(File(_eventImage!.path))

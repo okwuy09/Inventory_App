@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/category.dart';
-import 'package:viicsoft_inventory_app/models/equipment_not_avialable.dart';
-import 'package:viicsoft_inventory_app/services/apis/category_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
+import 'package:viicsoft_inventory_app/models/equipments.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 // ignore: must_be_immutable
 class EquipmentNotAvialablePage extends StatefulWidget {
-  const EquipmentNotAvialablePage({Key? key}) : super(key: key);
+  final List<EquipmentElement> equipment;
+  const EquipmentNotAvialablePage({Key? key, required this.equipment})
+      : super(key: key);
 
   @override
   State<EquipmentNotAvialablePage> createState() =>
@@ -17,15 +19,13 @@ class EquipmentNotAvialablePage extends StatefulWidget {
 
 class _EquipmentNotAvialablePageState extends State<EquipmentNotAvialablePage> {
   EquipmentCategory? selectedCategory;
-  final CategoryAPI _categoryApi = CategoryAPI();
-  late Future<List<EquipmentCategory>> _category;
-  late Future equipmentFuture;
-  List selectedEquipment = [];
+  late Stream<List<EquipmentCategory>> _category;
 
   @override
   void initState() {
     super.initState();
-    _category = _categoryApi.fetchAllCategory();
+    _category = Provider.of<AppData>(context, listen: false)
+        .fetchAllEquipmentCategory();
   }
 
   @override
@@ -56,107 +56,93 @@ class _EquipmentNotAvialablePageState extends State<EquipmentNotAvialablePage> {
           ],
         ),
       ),
-      body: FutureBuilder<List<EquipmentCategory>>(
-          future: _category,
+      body: StreamBuilder<List<EquipmentCategory>>(
+          stream: _category,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData) {
-                final category = snapshot.data;
-                if (category != null) {
-                  return Column(
-                    children: [
-                      Container(
-                        color: AppColor.lightGrey,
-                        padding: const EdgeInsets.symmetric(
-                            vertical: 20, horizontal: 25),
-                        height: 140,
-                        child: Column(
-                          children: [
-                            DropdownButton<EquipmentCategory>(
-                              isExpanded: true,
-                              value: selectedCategory ?? category[0],
-                              elevation: 16,
-                              style: TextStyle(color: Colors.grey[600]),
-                              onChanged: (newValue) {
-                                setState(() {
-                                  selectedCategory = newValue!;
-                                });
-                              },
-                              items: category.map((EquipmentCategory value) {
-                                return DropdownMenuItem<EquipmentCategory>(
-                                  value: value,
-                                  child: Text(
-                                    value.name,
-                                    style: style.copyWith(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColor.red,
-                                    ),
+            if (snapshot.hasData) {
+              final category = snapshot.data;
+              if (category != null) {
+                return Column(
+                  children: [
+                    Container(
+                      color: AppColor.lightGrey,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 25),
+                      height: 140,
+                      child: Column(
+                        children: [
+                          DropdownButton<EquipmentCategory>(
+                            isExpanded: true,
+                            value: selectedCategory ?? category[0],
+                            elevation: 16,
+                            style: TextStyle(color: Colors.grey[600]),
+                            onChanged: (newValue) {
+                              setState(() {
+                                selectedCategory = newValue!;
+                              });
+                            },
+                            items: category.map((EquipmentCategory value) {
+                              return DropdownMenuItem<EquipmentCategory>(
+                                value: value,
+                                child: Text(
+                                  value.name,
+                                  style: style.copyWith(
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.red,
                                   ),
-                                );
-                              }).toList(),
+                                ),
+                              );
+                            }).toList(),
+                          ),
+                          Center(
+                            child: Text(
+                              'Select category to display equipment',
+                              style: style.copyWith(
+                                  fontSize: 11, color: AppColor.darkGrey),
                             ),
-                            Center(
-                              child: Text(
-                                'Select category to display equipment',
-                                style: style.copyWith(
-                                    fontSize: 11, color: AppColor.darkGrey),
-                              ),
-                            )
-                          ],
-                        ),
+                          )
+                        ],
                       ),
-                      const SizedBox(height: 5),
-                      Expanded(
-                        child: FutureBuilder<
-                                List<EquipmentsNotAvailableElement>>(
-                            future:
-                                EquipmentAPI().fetchEquipmentsNotAvialable(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                if (selectedCategory == null) {
-                                  return ListView.builder(
-                                      itemCount: snapshot.data!.length,
-                                      itemBuilder: (_, int index) {
-                                        return equipmentCard(
-                                            snapshot.data!, index, context);
-                                      });
-                                } else {
-                                  final results = snapshot.data!;
-                                  var result = results
-                                      .where((item) => selectedCategory!.id
-                                          .contains(item.equipmentCategoryId))
-                                      .toList();
-                                  return ListView.builder(
-                                    itemCount: result.length,
-                                    itemBuilder: (_, int index) {
-                                      return equipmentCard(
-                                          result, index, context);
-                                    },
-                                  );
-                                }
-                              } else {
-                                return const Center();
-                              }
-                            }),
-                      )
-                    ],
-                  );
-                } else {
-                  return const Center();
-                }
+                    ),
+                    const SizedBox(height: 5),
+                    Expanded(
+                      child: Builder(builder: (context) {
+                        if (selectedCategory == null) {
+                          return ListView.builder(
+                              itemCount: widget.equipment.length,
+                              itemBuilder: (_, int index) {
+                                return equipmentCard(
+                                    widget.equipment, index, context);
+                              });
+                        } else {
+                          final results = widget.equipment;
+                          var result = results
+                              .where((item) => selectedCategory!.id
+                                  .contains(item.equipmentCategoryId))
+                              .toList();
+                          return ListView.builder(
+                            itemCount: result.length,
+                            itemBuilder: (_, int index) {
+                              return equipmentCard(result, index, context);
+                            },
+                          );
+                        }
+                      }),
+                    )
+                  ],
+                );
+              } else {
+                return const Center();
               }
             }
-            return Center(
-              child: CircularProgressIndicator(color: AppColor.darkGrey),
-            );
+            return pageCircularIndicator;
           }),
     );
   }
 
-  Padding equipmentCard(List<EquipmentsNotAvailableElement> result, int index,
-      BuildContext context) {
+  Padding equipmentCard(
+      List<EquipmentElement> result, int index, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(right: 20, left: 20),
       child: SizedBox(
@@ -269,41 +255,41 @@ class _EquipmentNotAvialablePageState extends State<EquipmentNotAvialablePage> {
                                         ),
                                       ),
                                     ),
-                                    Expanded(child: Container()),
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 10),
-                                      child: Column(
-                                        children: [
-                                          Text(
-                                            'CheckOut Date',
-                                            style: style.copyWith(
-                                              fontSize: 8,
-                                              color: AppColor.darkGrey,
-                                            ),
-                                          ),
-                                          const SizedBox(height: 5),
-                                          Text(
-                                            '${result[index].checkoutDate.day}-${result[index].checkoutDate.month}-${result[index].checkoutDate.year}',
-                                            style: style.copyWith(
-                                              fontSize: 8,
-                                              color: AppColor.darkGrey,
-                                            ),
-                                          )
-                                        ],
-                                      ),
-                                    ),
+                                    // Expanded(child: Container()),
+                                    // Padding(
+                                    //   padding: const EdgeInsets.only(right: 10),
+                                    //   child: Column(
+                                    //     children: [
+                                    //       Text(
+                                    //         'CheckOut Date',
+                                    //         style: style.copyWith(
+                                    //           fontSize: 8,
+                                    //           color: AppColor.darkGrey,
+                                    //         ),
+                                    //       ),
+                                    //       const SizedBox(height: 5),
+                                    //       Text(
+                                    //         '${result[index].checkoutDate.day}-${result[index].checkoutDate.month}-${result[index].checkoutDate.year}',
+                                    //         style: style.copyWith(
+                                    //           fontSize: 8,
+                                    //           color: AppColor.darkGrey,
+                                    //         ),
+                                    //       )
+                                    //     ],
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
                               ],
                             ),
                           ),
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width,
-                            child: Text('Event:   ${result[index].eventName}',
-                                maxLines: 2,
-                                style: style.copyWith(
-                                    fontSize: 11, color: AppColor.darkGrey)),
-                          ),
+                          // SizedBox(
+                          //   width: MediaQuery.of(context).size.width,
+                          //   child: Text('Event:   ${result[index].eventName}',
+                          //       maxLines: 2,
+                          //       style: style.copyWith(
+                          //           fontSize: 11, color: AppColor.darkGrey)),
+                          // ),
                         ],
                       ),
                     )

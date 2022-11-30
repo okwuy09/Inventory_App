@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/popover.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/models/future_event.dart';
-import 'package:viicsoft_inventory_app/models/profile.dart';
-import 'package:viicsoft_inventory_app/services/apis/user_api.dart';
+import 'package:viicsoft_inventory_app/models/events.dart';
+import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 import 'package:viicsoft_inventory_app/ui/event/future_event_equipment.dart';
 import 'package:viicsoft_inventory_app/ui/event/update_event.dart';
 
@@ -27,7 +27,7 @@ List<String> months = [
 
 void futureEventDetailbuttomSheet(
   context,
-  EventsFuture eventDetail,
+  Event eventDetail,
   String eventImage,
   String eventName,
   DateTime startDate,
@@ -39,6 +39,7 @@ void futureEventDetailbuttomSheet(
     backgroundColor: Colors.transparent,
     context: context,
     builder: (context) {
+      var priority = Provider.of<UserData>(context).userData.rolesPriority;
       return SizedBox(
         height: MediaQuery.of(context).size.height * 0.6,
         child: Popover(
@@ -58,21 +59,29 @@ void futureEventDetailbuttomSheet(
                 ),
               ),
               const SizedBox(height: 15),
-              Row(
-                children: [
-                  Text(
-                    "Date:  ${startDate.day}th ${months[startDate.month - 1]}",
+              RichText(
+                text: TextSpan(
+                    text: 'Date:  ',
                     style: style.copyWith(
-                      color: AppColor.darkGrey,
+                      color: AppColor.primaryColor,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Text(
-                    " -  ${endDate.day}th ${months[endDate.month - 1]}, ${endDate.year}",
-                    style: style.copyWith(
-                      color: AppColor.darkGrey,
-                    ),
-                  ),
-                ],
+                    children: [
+                      TextSpan(
+                        text:
+                            "${startDate.day}th ${months[startDate.month - 1]}",
+                        style: style.copyWith(
+                          color: AppColor.darkGrey,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                            " -  ${endDate.day}th ${months[endDate.month - 1]}, ${endDate.year}",
+                        style: style.copyWith(
+                          color: AppColor.darkGrey,
+                        ),
+                      )
+                    ]),
               ),
               const SizedBox(height: 15),
               Column(
@@ -118,67 +127,59 @@ void futureEventDetailbuttomSheet(
                     ),
                   ),
                   const SizedBox(height: 40),
-                  FutureBuilder<List<Groups>>(
-                      future: UserAPI().fetchUserGroup(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.done) {
-                          if (snapshot.hasError) {
-                            return const Center();
-                          } else {
-                            var userGroup = snapshot.data!;
-                            for (var i = 0; i < userGroup.length; i++) {
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  userGroup[i].id == '22'
-                                      ? MainButton(
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) => UpdateEventPage(
-                                                  eventDetail: eventDetail),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'EDIT EVENT',
-                                            style: style.copyWith(
-                                              fontSize: 14,
-                                              color: AppColor.primaryColor,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          backgroundColor: AppColor.white,
-                                          borderColor: AppColor.primaryColor,
-                                        )
-                                      : Container(),
-                                  const SizedBox(height: 10),
-                                  MainButton(
-                                    onTap: () => Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (_) =>
-                                                FutureEventsEquipment(
-                                                  eventDetail: eventDetail,
-                                                  string: userGroup[i].id,
-                                                ))),
-                                    child: Text(
-                                      'VIEW EQUIPMENTS',
-                                      style: style.copyWith(
-                                        fontSize: 14,
-                                        color: AppColor.buttonText,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    backgroundColor: AppColor.primaryColor,
-                                    borderColor: Colors.transparent,
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      priority == 'admin'
+                          ? MainButton(
+                              onTap: () {
+                                Navigator.pop(context);
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => UpdateEventPage(
+                                        eventDetail: eventDetail),
                                   ),
-                                ],
-                              );
-                            }
-                          }
-                        }
-                        return const Center();
-                      })
+                                );
+                              },
+                              child: Text(
+                                'EDIT EVENT',
+                                style: style.copyWith(
+                                  fontSize: 14,
+                                  color: AppColor.primaryColor,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              backgroundColor: AppColor.white,
+                              borderColor: AppColor.primaryColor,
+                            )
+                          : Container(),
+                      const SizedBox(height: 20),
+                      MainButton(
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => FutureEventsEquipment(
+                                eventDetail: eventDetail,
+                              ),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'VIEW EQUIPMENTS',
+                          style: style.copyWith(
+                            fontSize: 14,
+                            color: AppColor.buttonText,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        backgroundColor: AppColor.primaryColor,
+                        borderColor: Colors.transparent,
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ],

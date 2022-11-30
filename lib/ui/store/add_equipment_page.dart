@@ -3,13 +3,14 @@ import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/popover.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/category.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 class AddEquipmentPage extends StatefulWidget {
   final EquipmentCategory? category;
@@ -41,7 +42,6 @@ class _AddEquipmentPageState extends State<AddEquipmentPage> {
 
   String _scanBarcode = '';
   EquipmentCategory? newselectedCategory;
-  final EquipmentAPI _equipmentApi = EquipmentAPI();
 
   Future scanBarcodeNormal() async {
     String barcodeScanRes;
@@ -70,6 +70,7 @@ class _AddEquipmentPageState extends State<AddEquipmentPage> {
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
+    var provider = Provider.of<AppData>(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -349,14 +350,16 @@ class _AddEquipmentPageState extends State<AddEquipmentPage> {
               padding: const EdgeInsets.all(20),
               child: MainButton(
                 borderColor: Colors.transparent,
-                child: Text(
-                  'ADD NEW EQUIPMENT',
-                  style: style.copyWith(
-                    fontSize: 14,
-                    color: AppColor.buttonText,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: provider.isAddingEquipment
+                    ? buttonCircularIndicator
+                    : Text(
+                        'ADD NEW EQUIPMENT',
+                        style: style.copyWith(
+                          fontSize: 14,
+                          color: AppColor.buttonText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                 backgroundColor: AppColor.primaryColor,
                 onTap: () async {
                   if (globalFormKey.currentState!.validate()) {
@@ -369,28 +372,16 @@ class _AddEquipmentPageState extends State<AddEquipmentPage> {
                         noImage = false;
                       });
                     }
-                    var res = await _equipmentApi.addEquipment(
-                        _equipmentNameController.text,
-                        _itemimage!,
-                        widget.category!.id,
-                        _newCondition,
-                        _newSize,
-                        descriptionController.text,
-                        _scanBarcode);
-                    if (res.statusCode == 200 || res.statusCode == 201) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          backgroundColor: Colors.green,
-                          content: Text(
-                              "${_equipmentNameController.text} added successfully")));
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.red,
-                          content: Text("Something went wrong"),
-                        ),
-                      );
-                    }
+                    await provider.addNewEquipment(
+                      context: context,
+                      equipmentName: _equipmentNameController.text,
+                      equipmentCondition: _newCondition,
+                      equipmentSize: _newSize,
+                      equipmentDescription: descriptionController.text,
+                      equipmentBarcode: _scanBarcode,
+                      equipmentCategoryId: widget.category!.id,
+                      equipmentImage: _itemimage,
+                    );
                   }
                 },
               ),

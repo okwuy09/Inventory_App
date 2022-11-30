@@ -52,7 +52,8 @@ class _ProfileChangeSuccessPageState extends State<ProfileChangeSuccessPage> {
                     Navigator.pop(context);
                   },
                   child: const Text('Continue'),
-                  style: ElevatedButton.styleFrom(primary: AppColor.red),
+                  style:
+                      ElevatedButton.styleFrom(backgroundColor: AppColor.red),
                 ),
               ],
             ),

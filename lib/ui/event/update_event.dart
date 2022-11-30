@@ -1,16 +1,16 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/datefield.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/component/success_button_sheet.dart';
-import 'package:viicsoft_inventory_app/models/future_event.dart';
-import 'package:viicsoft_inventory_app/services/apis/event_api.dart';
+import 'package:viicsoft_inventory_app/models/events.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 class UpdateEventPage extends StatefulWidget {
-  final EventsFuture eventDetail;
+  final Event eventDetail;
   const UpdateEventPage({Key? key, required this.eventDetail})
       : super(key: key);
 
@@ -22,13 +22,13 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
   // ignore: unused_field
   XFile? _eventImage;
   //DateTime? selecteddate;
-
+  TextEditingController? eventName;
+  TextEditingController? eventType;
+  TextEditingController? eventLocation;
   DateTime? endingDate;
   DateTime? startingDate;
 
   bool hasData = false;
-
-  final EventAPI _eventAPI = EventAPI();
 
   final picker = ImagePicker();
 
@@ -58,20 +58,21 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
 
   @override
   void initState() {
-    endingDate = DateTime.parse('${widget.eventDetail.checkInDate}');
-    startingDate = DateTime.parse('${widget.eventDetail.checkOutDate}');
+    endingDate = widget.eventDetail
+        .checkInDate; //DateTime.parse('${widget.eventDetail.checkInDate}');
+    startingDate = widget.eventDetail
+        .checkOutDate; // DateTime.parse('${widget.eventDetail.checkOutDate}');
+    eventName = TextEditingController(text: widget.eventDetail.eventName);
+    eventType = TextEditingController(text: widget.eventDetail.eventType);
+    eventLocation =
+        TextEditingController(text: widget.eventDetail.eventLocation);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
-    TextEditingController _eventName =
-        TextEditingController(text: widget.eventDetail.eventName);
-    TextEditingController _eventType =
-        TextEditingController(text: widget.eventDetail.eventType);
-    TextEditingController _eventLocation =
-        TextEditingController(text: widget.eventDetail.eventLocation);
+    var provider = Provider.of<AppData>(context);
     return Scaffold(
       body: Column(
         children: [
@@ -127,7 +128,7 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
                             ),
                           ),
                           MyTextForm(
-                            controller: _eventName,
+                            controller: eventName,
                             obscureText: false,
                             labelText: widget.eventDetail.eventName,
                           ),
@@ -142,7 +143,7 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
                             ),
                           ),
                           MyTextForm(
-                            controller: _eventType,
+                            controller: eventType,
                             obscureText: false,
                             labelText: widget.eventDetail.eventType,
                           ),
@@ -157,7 +158,7 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
                             ),
                           ),
                           MyTextForm(
-                            controller: _eventType,
+                            controller: eventLocation,
                             obscureText: false,
                             labelText: widget.eventDetail.eventLocation,
                           ),
@@ -196,44 +197,27 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
                           SizedBox(height: screenSize.width * 0.27),
                           MainButton(
                             borderColor: Colors.transparent,
-                            child: Text(
-                              'UPDATE EVENT',
-                              style: style.copyWith(
-                                fontSize: 14,
-                                color: AppColor.buttonText,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                            child: provider.isUpdatingEvent
+                                ? buttonCircularIndicator
+                                : Text(
+                                    'UPDATE EVENT',
+                                    style: style.copyWith(
+                                      fontSize: 14,
+                                      color: AppColor.buttonText,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                             backgroundColor: AppColor.primaryColor,
                             onTap: () async {
-                              if (startingDate == DateTime.now() &&
-                                  endingDate == DateTime.now()) {
-                                startingDate = widget.eventDetail.checkOutDate;
-                                endingDate = widget.eventDetail.checkInDate;
-                              }
-                              var res = await _eventAPI.updateEvent(
-                                _eventName.text,
-                                _eventType.text,
-                                _eventLocation.text,
-                                endingDate.toString(),
-                                startingDate.toString(),
-                                widget.eventDetail.id,
+                              await provider.updateEvent(
+                                context: context,
+                                eventName: eventName!.text,
+                                eventLocation: eventLocation!.text,
+                                eventType: eventType!.text,
+                                checkInDate: endingDate!,
+                                checkOutDate: startingDate!,
+                                eventId: widget.eventDetail.id,
                               );
-
-                              if (res.statusCode == 200) {
-                                successButtomSheet(
-                                    context: context,
-                                    buttonText: 'BACK TO EVENTS',
-                                    title: ' Event Updated \n  Successfully!',
-                                    onTap: () => Navigator.pop(context));
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    backgroundColor: Colors.red,
-                                    content: Text("Something went wrong"),
-                                  ),
-                                );
-                              }
                             },
                           ),
                         ],
@@ -250,7 +234,6 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
   }
 
   _startingDate(BuildContext context) async {
-    startingDate = widget.eventDetail.checkOutDate;
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: startingDate!,
@@ -265,7 +248,6 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
   }
 
   _endingDate(BuildContext context) async {
-    endingDate = widget.eventDetail.checkInDate;
     final DateTime? selected = await showDatePicker(
       context: context,
       initialDate: endingDate!,
@@ -274,7 +256,6 @@ class _UpdateEventPageState extends State<UpdateEventPage> {
     );
     if (selected != null && selected != endingDate) {
       setState(() {
-        widget.eventDetail.checkInDate = endingDate!;
         endingDate = selected;
       });
     }

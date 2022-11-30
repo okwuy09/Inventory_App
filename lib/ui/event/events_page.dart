@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/events.dart';
-import 'package:viicsoft_inventory_app/models/profile.dart';
-import 'package:viicsoft_inventory_app/services/apis/user_api.dart';
-import 'package:viicsoft_inventory_app/ui/Menu/add_event_page.dart';
+import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
+import 'package:viicsoft_inventory_app/ui/event/add_event_page.dart';
 import 'package:viicsoft_inventory_app/ui/event/all_event.dart';
 import 'package:viicsoft_inventory_app/ui/event/future_event.dart';
 import 'package:viicsoft_inventory_app/ui/event/past_event.dart';
@@ -35,6 +35,7 @@ class _ItemsPageState extends State<EventsPage> {
   @override
   Widget build(BuildContext context) {
     var screensize = MediaQuery.of(context).size;
+    var priority = Provider.of<UserData>(context).userData.rolesPriority;
     return WillPopScope(
       onWillPop: () async => false,
       child: DefaultTabController(
@@ -85,42 +86,27 @@ class _ItemsPageState extends State<EventsPage> {
                   style: style.copyWith(fontSize: 24),
                 ),
                 Expanded(child: Container()),
-                FutureBuilder<List<Groups>>(
-                  future: UserAPI().fetchUserGroup(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.done) {
-                      if (snapshot.hasError) {
-                        return const Center();
-                      } else {
-                        var userGroup = snapshot.data!;
-                        for (var i = 0; i < userGroup.length; i++) {
-                          return userGroup[i].id == '22'
-                              ? TextButton(
-                                  child: Row(children: [
-                                    Icon(
-                                      Icons.add_circle_outline,
-                                      color: AppColor.primaryColor,
-                                    ),
-                                    const SizedBox(width: 5),
-                                    Text(
-                                      'Create Event',
-                                      style: style.copyWith(fontSize: 14),
-                                    )
-                                  ]),
-                                  onPressed: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const AddEventPage(),
-                                    ),
-                                  ),
-                                )
-                              : Container();
-                        }
-                      }
-                    }
-                    return const Center();
-                  },
-                ),
+                priority == 'admin'
+                    ? TextButton(
+                        child: Row(children: [
+                          Icon(
+                            Icons.add_circle_outline,
+                            color: AppColor.primaryColor,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'Create Event',
+                            style: style.copyWith(fontSize: 14),
+                          )
+                        ]),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const AddEventPage(),
+                          ),
+                        ),
+                      )
+                    : Container(),
               ],
             ),
           ),

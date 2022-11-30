@@ -6,14 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:viicsoft_inventory_app/component/buttom_navbar.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/services/notification_service.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
-import 'package:viicsoft_inventory_app/ui/Menu/add_event_page.dart';
-import 'package:viicsoft_inventory_app/ui/Menu/add_equipment_page.dart';
+import 'package:viicsoft_inventory_app/ui/event/add_event_page.dart';
+import 'package:viicsoft_inventory_app/ui/store/add_equipment_page.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/passwordresetsuccesspage.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/reset_password_page.dart';
 import 'package:viicsoft_inventory_app/ui/authentication/login_screen.dart';
@@ -41,6 +41,7 @@ Future<void> main() async {
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider(create: (_) => Authentication()),
     ChangeNotifierProvider(create: (_) => UserData()),
+    ChangeNotifierProvider(create: (_) => AppData()),
   ], child: const MyApp()));
 }
 

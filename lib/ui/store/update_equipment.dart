@@ -1,13 +1,14 @@
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/category.dart';
 import 'package:viicsoft_inventory_app/models/equipments.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 class UpdateEquipmentPage extends StatefulWidget {
   final EquipmentElement? equipment;
@@ -33,26 +34,28 @@ class _UpdateEquipmentPageState extends State<UpdateEquipmentPage> {
   }
 
   EquipmentCategory? newselectedCategory;
-  final EquipmentAPI _equipmentApi = EquipmentAPI();
   String? _newCondition;
+  TextEditingController? descriptionController;
+  TextEditingController? equipmentNameController;
+  String? newSize;
 
   List data = [];
 
   @override
   void initState() {
     _newCondition = widget.equipment!.equipmentCondition;
+    newSize = widget.equipment!.equipmentSize;
+    descriptionController =
+        TextEditingController(text: widget.equipment!.equipmentDescription);
+    equipmentNameController =
+        TextEditingController(text: widget.equipment!.equipmentName);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
-
-    String _newSize = widget.equipment!.equipmentSize;
-    TextEditingController descriptionController =
-        TextEditingController(text: widget.equipment!.equipmentDescription);
-    TextEditingController _equipmentNameController =
-        TextEditingController(text: widget.equipment!.equipmentName);
+    var provider = Provider.of<AppData>(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -107,7 +110,7 @@ class _UpdateEquipmentPageState extends State<UpdateEquipmentPage> {
                               ),
                             ),
                             MyTextForm(
-                              controller: _equipmentNameController,
+                              controller: equipmentNameController,
                               obscureText: false,
                               labelText: 'Enter equipment name',
                             ),
@@ -230,40 +233,26 @@ class _UpdateEquipmentPageState extends State<UpdateEquipmentPage> {
               padding: const EdgeInsets.all(20),
               child: MainButton(
                 borderColor: Colors.transparent,
-                child: Text(
-                  'UPDATE EQUIPMENT',
-                  style: style.copyWith(
-                    fontSize: 14,
-                    color: AppColor.buttonText,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                child: provider.isupdatingEquipment
+                    ? buttonCircularIndicator
+                    : Text(
+                        'UPDATE EQUIPMENT',
+                        style: style.copyWith(
+                          fontSize: 14,
+                          color: AppColor.buttonText,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                 backgroundColor: AppColor.primaryColor,
                 onTap: () async {
                   if (globalFormKey.currentState!.validate()) {
-                    var res = await _equipmentApi.updateEquipment(
-                      _equipmentNameController.text,
-                      widget.equipment!.equipmentCategoryId,
-                      _newCondition!,
-                      _newSize,
-                      descriptionController.text,
-                      widget.equipment!.equipmentBarcode!,
-                      widget.equipment!.id,
+                    await provider.updateEquipment(
+                      context: context,
+                      equipmentId: widget.equipment!.id,
+                      equipmentName: equipmentNameController!.text,
+                      equipmentCondition: _newCondition!,
+                      equipmentDescription: descriptionController!.text,
                     );
-                    if (res.statusCode == 200 || res.statusCode == 201) {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          backgroundColor: Colors.green,
-                          content: Text(
-                              "${_equipmentNameController.text} Updated successfully")));
-                      Navigator.pop(context);
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          backgroundColor: Colors.red,
-                          content: Text("Something went wrong"),
-                        ),
-                      );
-                    }
                   }
                 },
               ),

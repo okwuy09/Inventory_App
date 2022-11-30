@@ -105,7 +105,8 @@ class _ResetPasswordPageState extends State<ResetPasswordPage> {
                             context, '/PasswordResetSuccessPage');
                       },
                       child: const Text('Update Password'),
-                      style: ElevatedButton.styleFrom(primary: AppColor.red),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColor.red),
                     ),
                   ),
                 ],

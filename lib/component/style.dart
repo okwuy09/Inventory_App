@@ -17,11 +17,19 @@ final buttonCircularIndicator = SizedBox(
   ),
 );
 
-void successOperation(context) => ScaffoldMessenger.of(context).showSnackBar(
+final pageCircularIndicator = Center(
+  child: SizedBox(
+    height: 25,
+    width: 25,
+    child: CircularProgressIndicator(color: AppColor.darkGrey),
+  ),
+);
+
+successOperation(context) => ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         margin: const EdgeInsets.symmetric(
           horizontal: 80,
-          vertical: 110,
+          vertical: 120,
         ),
         content: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -38,7 +46,7 @@ void successOperation(context) => ScaffoldMessenger.of(context).showSnackBar(
             ),
           ],
         ),
-        backgroundColor: AppColor.primaryColor,
+        backgroundColor: Colors.green[600],
         padding: const EdgeInsets.all(10),
         duration: const Duration(milliseconds: 3000),
         behavior: SnackBarBehavior.floating,

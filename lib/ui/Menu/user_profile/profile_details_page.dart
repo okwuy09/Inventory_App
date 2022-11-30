@@ -8,7 +8,6 @@ import 'package:viicsoft_inventory_app/component/popover.dart';
 import 'package:viicsoft_inventory_app/component/profile_update.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/users.dart';
-import 'package:viicsoft_inventory_app/services/apis/user_api.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 
 class ProfileDetailPage extends StatefulWidget {
@@ -22,22 +21,6 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
 
   final picker = ImagePicker();
-  UserAPI userAPI = UserAPI();
-
-  // XFile? _profileimage;
-  // bool noImage = false;
-
-  // Future getImage(ImageSource source) async {
-  //   final pickedFile = await picker.pickImage(
-  //       source: source, imageQuality: 50, maxHeight: 700, maxWidth: 650);
-
-  //   if (pickedFile == null) {
-  //   } else {
-  //     setState(() {
-  //       _profileimage = pickedFile;
-  //     });
-  //   }
-  // }
 
   @override
   Widget build(BuildContext context) {

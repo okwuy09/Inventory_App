@@ -7,7 +7,6 @@ import 'package:viicsoft_inventory_app/component/passwordcheck.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/ui/authentication/login_screen.dart';
-import '../../services/apis/auth_api.dart';
 
 class SignupPage extends StatefulWidget {
   const SignupPage({Key? key}) : super(key: key);

@@ -14,13 +14,6 @@ class AllEventDetailPage extends StatefulWidget {
 }
 
 class _AllEventDetailPageState extends State<AllEventDetailPage> {
-  //XFile? _itemimage;
-  @override
-  void initState() {
-    setState(() {});
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size.height;

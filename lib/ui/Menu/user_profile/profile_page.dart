@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/logout_pop.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/services/apis/user_api.dart';
 import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/profile_details_page.dart';
@@ -17,7 +16,6 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   bool status = false;
-  UserAPI userAPI = UserAPI();
 
   @override
   Widget build(BuildContext context) {
@@ -208,7 +206,7 @@ class _ProfilePageState extends State<ProfilePage> {
           children: [
             Positioned(
               right: screensize.width * 0.185,
-              top: screensize.height * 0.054,
+              top: screensize.height * 0.068,
               child: Container(
                 height: 42,
                 width: 42,

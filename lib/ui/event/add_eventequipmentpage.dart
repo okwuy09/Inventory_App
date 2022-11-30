@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/models/avialable_equipment.dart';
 import 'package:viicsoft_inventory_app/models/category.dart';
-import 'package:viicsoft_inventory_app/services/apis/category_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/event_api.dart';
+import 'package:viicsoft_inventory_app/models/equipments.dart';
+import 'package:viicsoft_inventory_app/models/events.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 // ignore: must_be_immutable
 class AddEventEquipmentPage extends StatefulWidget {
-  String eventId;
-  String eventName;
-  AddEventEquipmentPage(
-      {Key? key, required this.eventId, required this.eventName})
-      : super(key: key);
+  Event event;
+  AddEventEquipmentPage({Key? key, required this.event}) : super(key: key);
 
   @override
   State<AddEventEquipmentPage> createState() => _AddEventEquipmentPageState();
@@ -22,9 +19,7 @@ class AddEventEquipmentPage extends StatefulWidget {
 
 class _AddEventEquipmentPageState extends State<AddEventEquipmentPage> {
   EquipmentCategory? selectedCategory;
-  final CategoryAPI _categoryApi = CategoryAPI();
-  final EquipmentAPI _equipmentAPI = EquipmentAPI();
-  late Future<List<EquipmentCategory>> _category;
+  late Stream<List<EquipmentCategory>> _category;
   late Future equipmentFuture;
   int? selectedIndex;
   List selectedEquipment = [];
@@ -32,12 +27,14 @@ class _AddEventEquipmentPageState extends State<AddEventEquipmentPage> {
   @override
   void initState() {
     super.initState();
-    _category = _categoryApi.fetchAllCategory();
+    _category = Provider.of<AppData>(context, listen: false)
+        .fetchAllEquipmentCategory();
   }
 
   @override
   Widget build(BuildContext context) {
     var screensize = MediaQuery.of(context).size;
+    var provider = Provider.of<AppData>(context);
     return Scaffold(
       backgroundColor: AppColor.homePageColor,
       appBar: AppBar(
@@ -58,122 +55,155 @@ class _AddEventEquipmentPageState extends State<AddEventEquipmentPage> {
               ),
             ),
             const SizedBox(width: 16),
-            Text(widget.eventName, style: style),
+            Text(widget.event.eventName, style: style),
             Expanded(child: Container()),
           ],
         ),
       ),
-      body: FutureBuilder<List<EquipmentCategory>>(
-          future: _category,
-          builder: (context, snapshot) {
-            final category = snapshot.data;
-            if (category != null) {
-              return Column(
-                children: [
-                  Container(
-                    color: AppColor.lightGrey,
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 25),
-                    height: 140,
-                    child: Column(
+      body: StreamBuilder<List<Event>>(
+        stream: provider.fetchAllEvent(),
+        builder: (context, snapshot) {
+          if (!snapshot.hasData) {
+            return pageCircularIndicator;
+          } else {
+            var event = snapshot.data!
+                .where((item) => item.id == widget.event.id)
+                .toList();
+            return StreamBuilder<List<EquipmentCategory>>(
+              stream: _category,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  final category = snapshot.data;
+                  if (category != null) {
+                    return Column(
                       children: [
-                        DropdownButton<EquipmentCategory>(
-                          isExpanded: true,
-                          value: selectedCategory ?? category[0],
-                          elevation: 16,
-                          style: TextStyle(color: Colors.grey[600]),
-                          onChanged: (newValue) {
-                            setState(() {
-                              selectedCategory = newValue!;
-                            });
-                          },
-                          items: category.map((EquipmentCategory value) {
-                            return DropdownMenuItem<EquipmentCategory>(
-                              value: value,
-                              child: Text(
-                                value.name,
-                                style: TextStyle(
-                                    color: AppColor.primaryColor, fontSize: 20),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        Center(
-                          child: Text(
-                            'Select category  and Add equipment to the Event',
-                            style: style.copyWith(
-                              fontSize: 12,
-                              color: AppColor.darkGrey,
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
-                  ),
-                  SizedBox(
-                    height: screensize.height * 0.56,
-                    child: FutureBuilder<List<EquipmentsAvailable>>(
-                        future: _equipmentAPI.fetchAvialableEquipments(),
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.done) {
-                            if (selectedCategory == null) {
-                              return ListView.builder(
-                                  itemCount: snapshot.data!.length,
-                                  itemBuilder: (_, index) {
-                                    return equipmentCard(screensize,
-                                        snapshot.data!, index, context);
+                        Container(
+                          color: AppColor.lightGrey,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 20, horizontal: 25),
+                          height: 140,
+                          child: Column(
+                            children: [
+                              DropdownButton<EquipmentCategory>(
+                                isExpanded: true,
+                                value: selectedCategory ?? category[0],
+                                elevation: 16,
+                                style: TextStyle(color: Colors.grey[600]),
+                                onChanged: (newValue) {
+                                  setState(() {
+                                    selectedCategory = newValue!;
                                   });
-                            } else {
-                              final results = snapshot.data!;
-                              var result = results
-                                  .where((item) => selectedCategory!.id
-                                      .contains(item.equipmentCategoryId))
-                                  .toList();
-                              return ListView.builder(
-                                itemCount: result.length,
-                                itemBuilder: (_, int index) {
-                                  return equipmentCard(
-                                      screensize, result, index, context);
                                 },
-                              );
-                            }
-                          } else {
-                            return const Center();
-                          }
-                        }),
-                  ),
-                  Padding(
-                    padding:
-                        const EdgeInsets.only(right: 20, left: 20, top: 20),
-                    child: MainButton(
-                      borderColor: Colors.transparent,
-                      child: Text(
-                        'CONTINUE',
-                        style: style.copyWith(
-                          fontSize: 14,
-                          color: AppColor.buttonText,
-                          fontWeight: FontWeight.bold,
+                                items: category.map((EquipmentCategory value) {
+                                  return DropdownMenuItem<EquipmentCategory>(
+                                    value: value,
+                                    child: Text(
+                                      value.name,
+                                      style: TextStyle(
+                                          color: AppColor.primaryColor,
+                                          fontSize: 20),
+                                    ),
+                                  );
+                                }).toList(),
+                              ),
+                              Center(
+                                child: Text(
+                                  'Select category  and Add equipment to the Event',
+                                  style: style.copyWith(
+                                    fontSize: 12,
+                                    color: AppColor.darkGrey,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
                         ),
-                      ),
-                      backgroundColor: AppColor.primaryColor,
-                      onTap: () => {
-                        Navigator.pop(context),
-                        setState(() {}),
-                      },
-                    ),
-                  ),
-                ],
-              );
-            } else {
-              return const Center();
-            }
-          }),
+                        SizedBox(
+                          height: screensize.height * 0.56,
+                          child: StreamBuilder<List<EquipmentElement>>(
+                              stream: provider.fetchAllEquipment(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  final result = snapshot.data!;
+                                  var results = result
+                                      .where((item) =>
+                                          item.isEquipmentAvialable == true)
+                                      .toList();
+                                  if (selectedCategory == null) {
+                                    return ListView.builder(
+                                        itemCount: results.length,
+                                        itemBuilder: (_, index) {
+                                          return equipmentCard(
+                                            screensize,
+                                            results,
+                                            index,
+                                            context,
+                                            provider,
+                                            event[0],
+                                          );
+                                        });
+                                  } else {
+                                    var newResult = results
+                                        .where((item) => selectedCategory!.id
+                                            .contains(item.equipmentCategoryId))
+                                        .toList();
+                                    return ListView.builder(
+                                      itemCount: newResult.length,
+                                      itemBuilder: (_, int index) {
+                                        return equipmentCard(
+                                          screensize,
+                                          newResult,
+                                          index,
+                                          context,
+                                          provider,
+                                          event[0],
+                                        );
+                                      },
+                                    );
+                                  }
+                                }
+                                return pageCircularIndicator;
+                              }),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                              right: 20, left: 20, top: 20),
+                          child: MainButton(
+                            borderColor: Colors.transparent,
+                            child: Text(
+                              'CONTINUE',
+                              style: style.copyWith(
+                                fontSize: 14,
+                                color: AppColor.buttonText,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            backgroundColor: AppColor.primaryColor,
+                            onTap: () => {
+                              Navigator.pop(context),
+                              setState(() {}),
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  } else {
+                    return const Center();
+                  }
+                }
+                return pageCircularIndicator;
+              },
+            );
+          }
+        },
+      ),
     );
   }
 
-  Padding equipmentCard(Size screensize, List<EquipmentsAvailable> result,
-      int index, BuildContext context) {
+  Padding equipmentCard(Size screensize, List<EquipmentElement> result,
+      int index, BuildContext context, AppData provider, Event event) {
+    var eventEquipment = List<String>.generate(event.eventEquipment.length,
+        (i) => event.eventEquipment[i].equipmentId).toList();
     return Padding(
       padding: const EdgeInsets.only(right: 20, left: 20),
       child: SizedBox(
@@ -295,25 +325,15 @@ class _AddEventEquipmentPageState extends State<AddEventEquipmentPage> {
                                     Expanded(child: Container()),
                                     IconButton(
                                         onPressed: () async {
-                                          var res = await EventAPI()
-                                              .addEventEquipment(widget.eventId,
-                                                  result[index].equipmentId);
-                                          if (res.statusCode == 200 &&
-                                              selectedEquipment.contains(
-                                                  result[index].equipmentId)) {
-                                            setState(() {
-                                              selectedEquipment.remove(
-                                                  result[index].equipmentId);
-                                            });
-                                          } else {
-                                            setState(() {
-                                              selectedEquipment.add(
-                                                  result[index].equipmentId);
-                                            });
-                                          }
+                                          await provider.addEventEquipment(
+                                            equipmentId: result[index].id,
+                                            ischeckedOut: false,
+                                            eventId: event.id,
+                                            context: context,
+                                          );
                                         },
-                                        icon: selectedEquipment.contains(
-                                                result[index].equipmentId)
+                                        icon: eventEquipment
+                                                .contains(result[index].id)
                                             ? Icon(Icons.check_box_outlined,
                                                 color: AppColor.green)
                                             : Icon(

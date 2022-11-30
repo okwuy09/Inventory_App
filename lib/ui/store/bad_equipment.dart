@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/equip_cond_sheet.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/category.dart';
 import 'package:viicsoft_inventory_app/models/equipments.dart';
-import 'package:viicsoft_inventory_app/services/apis/category_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 // ignore: must_be_immutable
 class BadEquipmentPage extends StatefulWidget {
-  const BadEquipmentPage({Key? key}) : super(key: key);
+  final List<EquipmentElement> equipment;
+  const BadEquipmentPage({Key? key, required this.equipment}) : super(key: key);
 
   @override
   State<BadEquipmentPage> createState() => _BadEquipmentPageState();
@@ -17,15 +18,14 @@ class BadEquipmentPage extends StatefulWidget {
 
 class _BadEquipmentPageState extends State<BadEquipmentPage> {
   EquipmentCategory? selectedCategory;
-  final CategoryAPI _categoryApi = CategoryAPI();
-  late Future<List<EquipmentCategory>> _category;
-  late Future equipmentFuture;
-  List selectedEquipment = [];
+
+  late Stream<List<EquipmentCategory>> _category;
 
   @override
   void initState() {
     super.initState();
-    _category = _categoryApi.fetchAllCategory();
+    _category = Provider.of<AppData>(context, listen: false)
+        .fetchAllEquipmentCategory();
   }
 
   @override
@@ -33,151 +33,128 @@ class _BadEquipmentPageState extends State<BadEquipmentPage> {
     var screenSize = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: AppColor.homePageColor,
-      body: FutureBuilder<List<EquipmentCategory>>(
-          future: _category,
+      body: StreamBuilder<List<EquipmentCategory>>(
+          stream: _category,
           builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData) {
-                final category = snapshot.data;
-                if (category != null) {
-                  return Column(
-                    children: [
-                      Container(
-                        height: 220,
-                        padding: const EdgeInsets.only(top: 50),
-                        color: const Color(0xFFFEEAEA),
-                        child: Column(
-                          children: [
-                            Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  icon: const Icon(
-                                    Icons.arrow_back_ios_new,
-                                    size: 21.75,
-                                  ),
+            if (snapshot.hasData) {
+              final category = snapshot.data;
+              if (category != null) {
+                return Column(
+                  children: [
+                    Container(
+                      height: 220,
+                      padding: const EdgeInsets.only(top: 50),
+                      color: const Color(0xFFFEEAEA),
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: const Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 21.75,
                                 ),
-                                Expanded(child: Container()),
-                                Text('Bad Equipments', style: style),
-                                const SizedBox(width: 50),
-                                Expanded(child: Container()),
+                              ),
+                              Expanded(child: Container()),
+                              Text('Bad Equipments', style: style),
+                              const SizedBox(width: 50),
+                              Expanded(child: Container()),
+                            ],
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 20, horizontal: 25),
+                            height: 110,
+                            child: Column(
+                              children: [
+                                DropdownButton<EquipmentCategory>(
+                                  dropdownColor: const Color(0xFFFEEAEA),
+                                  isExpanded: true,
+                                  value: selectedCategory ?? category[0],
+                                  elevation: 16,
+                                  style: style.copyWith(fontSize: 12),
+                                  onChanged: (newValue) {
+                                    setState(() {
+                                      selectedCategory = newValue!;
+                                    });
+                                  },
+                                  items:
+                                      category.map((EquipmentCategory value) {
+                                    return DropdownMenuItem<EquipmentCategory>(
+                                      value: value,
+                                      child: Text(value.name,
+                                          style: style.copyWith(
+                                              color: const Color((0xFFF22B29)),
+                                              fontSize: 18)),
+                                    );
+                                  }).toList(),
+                                ),
+                                Center(
+                                  child: Text(
+                                    'Select category to display equipment',
+                                    style: style.copyWith(
+                                      fontSize: 12,
+                                      color: AppColor.darkGrey,
+                                    ),
+                                  ),
+                                )
                               ],
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  vertical: 20, horizontal: 25),
-                              height: 110,
-                              child: Column(
-                                children: [
-                                  DropdownButton<EquipmentCategory>(
-                                    dropdownColor: const Color(0xFFFEEAEA),
-                                    isExpanded: true,
-                                    value: selectedCategory ?? category[0],
-                                    elevation: 16,
-                                    style: style.copyWith(fontSize: 12),
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        selectedCategory = newValue!;
-                                      });
-                                    },
-                                    items:
-                                        category.map((EquipmentCategory value) {
-                                      return DropdownMenuItem<
-                                          EquipmentCategory>(
-                                        value: value,
-                                        child: Text(value.name,
-                                            style: style.copyWith(
-                                                color:
-                                                    const Color((0xFFF22B29)),
-                                                fontSize: 18)),
-                                      );
-                                    }).toList(),
-                                  ),
-                                  Center(
-                                    child: Text(
-                                      'Select category to display equipment',
-                                      style: style.copyWith(
-                                        fontSize: 12,
-                                        color: AppColor.darkGrey,
-                                      ),
-                                    ),
-                                  )
-                                ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: screenSize.height * 0.7,
+                      child: Builder(builder: (context) {
+                        if (selectedCategory == null) {
+                          return SizedBox(
+                            child: MediaQuery.removePadding(
+                              removeTop: true,
+                              context: context,
+                              child: ListView.builder(
+                                itemCount: widget.equipment.length,
+                                itemBuilder: (_, int index) {
+                                  return equipmentCard(
+                                    widget.equipment,
+                                    index,
+                                    context,
+                                  );
+                                },
                               ),
                             ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(
-                        height: screenSize.height * 0.7,
-                        child: FutureBuilder<List<EquipmentElement>>(
-                            future: EquipmentAPI().fetchAllEquipments(),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                if (selectedCategory == null) {
-                                  final results = snapshot.data!;
-                                  var result = results
-                                      .where((item) =>
-                                          item.equipmentCondition == 'BAD')
-                                      .toList();
-                                  return SizedBox(
-                                    child: MediaQuery.removePadding(
-                                      removeTop: true,
-                                      context: context,
-                                      child: ListView.builder(
-                                        itemCount: result.length,
-                                        itemBuilder: (_, int index) {
-                                          return equipmentCard(
-                                            result,
-                                            index,
-                                            context,
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  );
-                                } else {
-                                  final results = snapshot.data!;
-                                  var newResult = results
-                                      .where((item) =>
-                                          item.equipmentCondition == 'BAD')
-                                      .toList();
-                                  var result = newResult
-                                      .where((item) => selectedCategory!.id
-                                          .contains(item.equipmentCategoryId))
-                                      .toList();
-                                  return MediaQuery.removePadding(
-                                    removeTop: true,
-                                    context: context,
-                                    child: ListView.builder(
-                                      itemCount: result.length,
-                                      itemBuilder: (_, int index) {
-                                        return equipmentCard(
-                                            result, index, context);
-                                      },
-                                    ),
-                                  );
-                                }
-                              } else {
-                                return const Center();
-                              }
-                            }),
-                      )
-                    ],
-                  );
-                } else {
-                  return Center(
-                    child: CircularProgressIndicator(color: AppColor.darkGrey),
-                  );
-                }
+                          );
+                        } else {
+                          final results = widget.equipment;
+
+                          var result = results
+                              .where((item) => selectedCategory!.id
+                                  .contains(item.equipmentCategoryId))
+                              .toList();
+                          return MediaQuery.removePadding(
+                            removeTop: true,
+                            context: context,
+                            child: ListView.builder(
+                              itemCount: result.length,
+                              itemBuilder: (_, int index) {
+                                return equipmentCard(result, index, context);
+                              },
+                            ),
+                          );
+                        }
+                      }),
+                    )
+                  ],
+                );
+              } else {
+                return const Center();
               }
             }
-            return Center(
-              child: CircularProgressIndicator(color: AppColor.darkGrey),
-            );
+
+            return pageCircularIndicator;
           }),
     );
   }

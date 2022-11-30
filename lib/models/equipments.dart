@@ -1,58 +1,3 @@
-// To parse this JSON data, do
-//
-//     final equipment = equipmentFromJson(jsonString);
-
-import 'dart:convert';
-
-Equipment equipmentFromJson(String str) => Equipment.fromJson(json.decode(str));
-
-String equipmentToJson(Equipment data) => json.encode(data.toJson());
-
-class Equipment {
-  Equipment({
-    required this.status,
-    required this.message,
-    required this.data,
-    required this.total,
-  });
-
-  bool status;
-  String message;
-  Data data;
-  int total;
-
-  factory Equipment.fromJson(Map<String, dynamic> json) => Equipment(
-        status: json["status"],
-        message: json["message"],
-        data: Data.fromJson(json["data"]),
-        total: json["total"],
-      );
-
-  Map<String, dynamic> toJson() => {
-        "status": status,
-        "message": message,
-        "data": data.toJson(),
-        "total": total,
-      };
-}
-
-class Data {
-  Data({
-    required this.equipments,
-  });
-
-  List<EquipmentElement> equipments;
-
-  factory Data.fromJson(Map<String, dynamic> json) => Data(
-        equipments: List<EquipmentElement>.from(
-            json["equipments"].map((x) => EquipmentElement.fromJson(x))),
-      );
-
-  Map<String, dynamic> toJson() => {
-        "equipments": List<dynamic>.from(equipments.map((x) => x.toJson())),
-      };
-}
-
 class EquipmentElement {
   EquipmentElement({
     required this.id,
@@ -63,6 +8,7 @@ class EquipmentElement {
     this.equipmentBarcode,
     required this.equipmentCategoryId,
     required this.equipmentImage,
+    required this.isEquipmentAvialable,
   });
 
   String id;
@@ -73,6 +19,7 @@ class EquipmentElement {
   String? equipmentBarcode;
   String equipmentCategoryId;
   String equipmentImage;
+  bool isEquipmentAvialable;
 
   factory EquipmentElement.fromJson(Map<String, dynamic> json) =>
       EquipmentElement(
@@ -90,6 +37,7 @@ class EquipmentElement {
             : json["equipment_barcode"],
         equipmentCategoryId: json["equipment_category_id"],
         equipmentImage: json["equipment_image"],
+        isEquipmentAvialable: json["isEquipmentAvialable"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -105,5 +53,6 @@ class EquipmentElement {
         "equipment_barcode": equipmentBarcode == null ? null : equipmentBarcode,
         "equipment_category_id": equipmentCategoryId,
         "equipment_image": equipmentImage,
+        "isEquipmentAvialable": isEquipmentAvialable,
       };
 }

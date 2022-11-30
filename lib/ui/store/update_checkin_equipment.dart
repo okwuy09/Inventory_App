@@ -3,18 +3,27 @@ import 'package:flutter/services.dart';
 import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/popover.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/category.dart';
-import 'package:viicsoft_inventory_app/models/eventequipmentchecklist.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_checkin_api.dart';
+import 'package:viicsoft_inventory_app/models/equipments.dart';
+import 'package:viicsoft_inventory_app/models/events.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
+import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 
 class UpdateCheckInEquipment extends StatefulWidget {
-  final EventEquipmentChecklist? equipment;
-  const UpdateCheckInEquipment({Key? key, this.equipment}) : super(key: key);
+  final EquipmentElement equipment;
+  final Event event;
+  final int index;
+  const UpdateCheckInEquipment(
+      {Key? key,
+      required this.equipment,
+      required this.event,
+      required this.index})
+      : super(key: key);
 
   @override
   State<UpdateCheckInEquipment> createState() => _UpdateCheckInEquipmentState();
@@ -36,9 +45,7 @@ class _UpdateCheckInEquipmentState extends State<UpdateCheckInEquipment> {
   }
 
   EquipmentCategory? newselectedCategory;
-  final EquipmentAPI _equipmentApi = EquipmentAPI();
-  final EquipmentCheckInAPI _equipmentCheckInAPI = EquipmentCheckInAPI();
-  TextEditingController descriptionController = TextEditingController();
+  TextEditingController? descriptionController;
   String? _newCondition;
   String _scanInBarcode = '';
   bool noImage = false;
@@ -47,7 +54,9 @@ class _UpdateCheckInEquipmentState extends State<UpdateCheckInEquipment> {
 
   @override
   void initState() {
-    _newCondition = widget.equipment!.equipment.equipmentCondition;
+    _newCondition = widget.equipment.equipmentCondition;
+    descriptionController =
+        TextEditingController(text: widget.equipment.equipmentDescription);
     super.initState();
   }
 
@@ -69,7 +78,8 @@ class _UpdateCheckInEquipmentState extends State<UpdateCheckInEquipment> {
   @override
   Widget build(BuildContext context) {
     var screenSize = MediaQuery.of(context).size;
-
+    var provider = Provider.of<AppData>(context);
+    var userData = Provider.of<UserData>(context).userData.fullName;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -90,7 +100,7 @@ class _UpdateCheckInEquipmentState extends State<UpdateCheckInEquipment> {
             ),
             const SizedBox(width: 5),
             Text(
-              'Update ( ${widget.equipment!.equipment.equipmentName} )',
+              'Update ( ${widget.equipment.equipmentName} )',
               style: style.copyWith(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
@@ -249,36 +259,21 @@ class _UpdateCheckInEquipmentState extends State<UpdateCheckInEquipment> {
                         noImage = true;
                       });
                     } else {
-                      await _checkIn(
-                          widget.equipment!.equipment.equipmentBarcode,
-                          widget.equipment!.equipmentId);
-                      var res = await _equipmentApi.updateEventEquipment(
-                        widget.equipment!.equipment.equipmentName,
-                        _itemimage!,
-                        widget.equipment!.equipment.equipmentCategoryId,
-                        _newCondition!,
-                        'LONG',
-                        descriptionController.text,
-                        widget.equipment!.equipment.equipmentBarcode,
-                        widget.equipment!.equipmentId,
+                      provider.updateCheckinEquipment(
+                        context: context,
+                        equipmentId: widget.equipment.id,
+                        equipmentCondition: _newCondition!,
+                        equipmentDescription: descriptionController!.text,
+                        equipmentImage: _itemimage,
                       );
-                      if (res.statusCode == 200) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.green,
-                            content: Text(
-                                "${widget.equipment!.equipment.equipmentName} Updated successfully"),
-                          ),
-                        );
-                        Navigator.pop(context);
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            backgroundColor: Colors.red,
-                            content: Text("Something went wrong"),
-                          ),
-                        );
-                      }
+                      await _checkIn(
+                        widget.equipment.equipmentBarcode,
+                        widget.equipment.id,
+                        provider,
+                        widget.event.id,
+                        userData!,
+                      );
+                      Navigator.pop(context);
 
                       setState(() {
                         noImage = false;
@@ -384,10 +379,30 @@ class _UpdateCheckInEquipmentState extends State<UpdateCheckInEquipment> {
   }
 
   //
-  _checkIn(String? equipmentBarcode, String equipmentId) async {
+  _checkIn(String? equipmentBarcode, String equipmentId, AppData provider,
+      String eventId, String userData) async {
     await scanInBarcode();
     if (equipmentBarcode == _scanInBarcode) {
-      return await _equipmentCheckInAPI.checkinEquipments(equipmentId);
+      return provider
+          .addEventsEquipmentCheckIn(
+        context: context,
+        eventId: eventId,
+        equipmentId: equipmentId,
+        returnDatetime: DateTime.now(),
+        checkinUserName: userData,
+        equipmentImage: widget.equipment.equipmentImage,
+        equipmentName: widget.equipment.equipmentName,
+        eventName: widget.event.eventName,
+        equipmentCondition: widget.equipment.equipmentCondition,
+      )
+          .then((value) async {
+        await provider.checkedIn(equipmentId);
+        provider.updateCheckOutEquipment(
+          context: context,
+          equipId: widget.equipment.id,
+          checkinUser: userData,
+        );
+      });
     }
   }
 }

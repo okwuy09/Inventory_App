@@ -1,13 +1,13 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/popover.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/services/apis/category_api.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 
 class CategorySheet extends StatefulWidget {
   const CategorySheet({Key? key}) : super(key: key);
@@ -41,6 +41,7 @@ class _CategorySheetState extends State<CategorySheet> {
 
   @override
   Widget build(BuildContext context) {
+    var provider = Provider.of<AppData>(context);
     return Form(
       key: _globalFormKey,
       child: Padding(
@@ -51,75 +52,70 @@ class _CategorySheetState extends State<CategorySheet> {
         child: Popover(
           mainAxisSize: MainAxisSize.min,
           child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'New equipment category',
-                  style: style.copyWith(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                  ),
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'New equipment category',
+                style: style.copyWith(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
-                const SizedBox(height: 20),
-                categoryImages(context),
-                Center(
-                  child: Text(
-                    noImage ? 'No image selected !' : '',
-                    style: style.copyWith(fontSize: 12, color: AppColor.red),
-                  ),
+              ),
+              const SizedBox(height: 20),
+              categoryImages(context),
+              Center(
+                child: Text(
+                  noImage ? 'No image selected !' : '',
+                  style: style.copyWith(fontSize: 12, color: AppColor.red),
                 ),
-                const SizedBox(height: 10),
-                MyTextForm(
-                  controller: _categoryName,
-                  obscureText: false,
-                  labelText: 'Enter new equipmet category name',
-                  validatior: (input) =>
-                      input!.isEmpty ? "Enter category name*" : null,
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 20, bottom: 20),
-                  child: MainButton(
-                    borderColor: Colors.transparent,
-                    backgroundColor: AppColor.primaryColor,
-                    child: Text(
-                      'DONE',
-                      style: style.copyWith(
-                        fontSize: 14,
-                        color: AppColor.buttonText,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    onTap: () async {
-                      if (_globalFormKey.currentState!.validate()) {
-                        if (_categoryimage == null) {
-                          setState(() {
-                            noImage = true;
-                          });
-                        } else {
-                          setState(() {
-                            noImage = false;
-                          });
-                        }
-                        var res = await CategoryAPI().addCategory(
-                            _categoryName.text.trim(), _categoryimage!);
-
-                        if (res.statusCode == 200) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              backgroundColor: Colors.green,
-                              content: Text(
-                                  "New Category (${_categoryName.text}) successfully Created"),
-                            ),
-                          );
-
-                          Navigator.of(context).pop();
-                        }
+              ),
+              const SizedBox(height: 10),
+              MyTextForm(
+                controller: _categoryName,
+                obscureText: false,
+                labelText: 'Enter new equipmet category name',
+                validatior: (input) =>
+                    input!.isEmpty ? "Enter category name*" : null,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(top: 20, bottom: 20),
+                child: MainButton(
+                  borderColor: Colors.transparent,
+                  backgroundColor: AppColor.primaryColor,
+                  child: provider.isCreatingCategory
+                      ? buttonCircularIndicator
+                      : Text(
+                          'DONE',
+                          style: style.copyWith(
+                            fontSize: 14,
+                            color: AppColor.buttonText,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                  onTap: () async {
+                    if (_globalFormKey.currentState!.validate()) {
+                      if (_categoryimage == null) {
+                        setState(() {
+                          noImage = true;
+                        });
+                      } else {
+                        setState(() {
+                          noImage = false;
+                        });
                       }
-                    },
-                  ),
+                      await provider.createEquipmentCategory(
+                        context: context,
+                        categoryName: _categoryName.text,
+                        categoryImage: _categoryimage,
+                      );
+                      Navigator.of(context).pop();
+                    }
+                  },
                 ),
-              ]),
+              ),
+            ],
+          ),
         ),
       ),
     );

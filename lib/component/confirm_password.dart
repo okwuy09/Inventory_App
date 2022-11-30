@@ -4,9 +4,7 @@ import 'package:viicsoft_inventory_app/component/button.dart';
 import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
-import 'package:viicsoft_inventory_app/component/success_button_sheet.dart';
 import 'package:viicsoft_inventory_app/models/users.dart';
-import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 
 class ConfirmPassswordSheet extends StatefulWidget {

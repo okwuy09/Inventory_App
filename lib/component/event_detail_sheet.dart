@@ -63,21 +63,29 @@ void eventDetailbuttomSheet(
                 ),
               ),
               const SizedBox(height: 15),
-              Row(
-                children: [
-                  Text(
-                    "Date:  ${startDate.day}th ${months[startDate.month - 1]}",
+              RichText(
+                text: TextSpan(
+                    text: 'Date:  ',
                     style: style.copyWith(
-                      color: AppColor.darkGrey,
+                      color: AppColor.primaryColor,
+                      fontWeight: FontWeight.bold,
                     ),
-                  ),
-                  Text(
-                    " -  ${endDate.day}th ${months[endDate.month - 1]}, ${endDate.year}",
-                    style: style.copyWith(
-                      color: AppColor.darkGrey,
-                    ),
-                  ),
-                ],
+                    children: [
+                      TextSpan(
+                        text:
+                            "${startDate.day}th ${months[startDate.month - 1]}",
+                        style: style.copyWith(
+                          color: AppColor.darkGrey,
+                        ),
+                      ),
+                      TextSpan(
+                        text:
+                            " -  ${endDate.day}th ${months[endDate.month - 1]}, ${endDate.year}",
+                        style: style.copyWith(
+                          color: AppColor.darkGrey,
+                        ),
+                      )
+                    ]),
               ),
               const SizedBox(height: 15),
               Column(

@@ -3,16 +3,9 @@ import 'package:provider/provider.dart';
 import 'package:viicsoft_inventory_app/component/home_activities_container.dart';
 import 'package:viicsoft_inventory_app/component/homebigcontainer.dart';
 import 'package:viicsoft_inventory_app/component/homesmallcontainer.dart';
-import 'package:viicsoft_inventory_app/models/avialable_equipment.dart';
-import 'package:viicsoft_inventory_app/models/equipment_not_avialable.dart';
-import 'package:viicsoft_inventory_app/models/equipmentcheckin.dart';
+import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/models/equipments.dart';
-import 'package:viicsoft_inventory_app/models/eventequipmentcheckout.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_checkin_api.dart';
-import 'package:viicsoft_inventory_app/services/apis/equipment_checkout_api.dart';
-import 'package:viicsoft_inventory_app/services/notification_service.dart';
-import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
+import 'package:viicsoft_inventory_app/services/provider/appdata.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/profile_page.dart';
 import 'package:viicsoft_inventory_app/ui/event/checkin_equipment.dart';
@@ -33,11 +26,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final EquipmentAPI _equipmentApi = EquipmentAPI();
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  Future refresh() async {
-    setState(() {});
-  }
 
   @override
   void initState() {
@@ -50,7 +39,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // var screensize = MediaQuery.of(context).size;
+    var provider = Provider.of<AppData>(context);
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -60,8 +49,9 @@ class _HomePageState extends State<HomePage> {
           automaticallyImplyLeading: false,
           elevation: 0,
           backgroundColor: AppColor.white,
+          toolbarHeight: 65,
           flexibleSpace: Padding(
-            padding: const EdgeInsets.only(top: 30, left: 20, right: 20),
+            padding: const EdgeInsets.only(top: 45, left: 20, right: 20),
             child: Row(
               children: [
                 Text(
@@ -94,14 +84,12 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         backgroundColor: AppColor.homePageColor,
-        body: FutureBuilder<List<EquipmentElement>>(
-          future: EquipmentAPI().fetchAllEquipments(),
+        body: StreamBuilder<List<EquipmentElement>>(
+          stream: provider.fetchAllEquipment(),
           builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(
-                child: CircularProgressIndicator(color: AppColor.darkGrey),
-              );
-            } else if (snapshot.connectionState == ConnectionState.done) {
+            if (!snapshot.hasData) {
+              return pageCircularIndicator;
+            } else {
               final result = snapshot.data!;
               var fairResult = result
                   .where((item) => item.equipmentCondition == 'FAIR')
@@ -116,288 +104,260 @@ class _HomePageState extends State<HomePage> {
                   .where((item) => item.equipmentCondition == 'OLD')
                   .toList();
               var goodResult = newResult + oldResult;
-              return RefreshIndicator(
-                onRefresh: refresh,
-                child: ListView(
-                  children: [
-                    Container(
-                      padding:
-                          const EdgeInsets.only(top: 0, left: 20, right: 20),
-                      child: Column(
-                        children: [
-                          const SizedBox(
-                            height: 22.0,
-                          ),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            const TotalEquipmentPage())),
-                                child: HomeBigContainer(
-                                  backgroundColor: AppColor.homePageTotalEquip,
-                                  dividerColor: const Color(0xFF6ECAFA),
-                                  title: 'Total Equipments',
-                                  totalCount: result.length.toString(),
-                                  onTap: () => Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (_) =>
-                                              const TotalEquipmentPage())),
+              var avialableEquipment = result
+                  .where((item) => item.isEquipmentAvialable == true)
+                  .toList();
+              var notAvialableEquipment = result
+                  .where((item) => item.isEquipmentAvialable == false)
+                  .toList();
+              return ListView(
+                children: [
+                  Container(
+                    padding:
+                        const EdgeInsets.only(top: 15, left: 20, right: 20),
+                    child: Column(
+                      children: [
+                        Row(
+                          children: [
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      TotalEquipmentPage(equipment: result),
                                 ),
                               ),
-                              Expanded(child: Container()),
-                              FutureBuilder<List<EquipmentsAvailable>>(
-                                  future:
-                                      _equipmentApi.fetchAvialableEquipments(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState ==
-                                        ConnectionState.done) {
-                                      if (snapshot.hasData) {
-                                        var aviableEquipment = snapshot.data!;
-                                        return InkWell(
-                                          onTap: () => Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (_) =>
-                                                  const AvialableEquipmentPage(),
-                                            ),
-                                          ),
-                                          child: HomeBigContainer(
-                                            backgroundColor: AppColor.green,
-                                            dividerColor:
-                                                const Color(0xFF78D0A5),
-                                            title: 'Avialable Equipments',
-                                            totalCount: aviableEquipment.length
-                                                .toString(),
-                                            onTap: () => Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (_) =>
-                                                    const AvialableEquipmentPage(),
-                                              ),
-                                            ),
-                                          ),
-                                        );
-                                      }
-                                    }
-                                    return const Center();
-                                  }),
-                              Expanded(child: Container()),
-                              FutureBuilder<
-                                  List<EquipmentsNotAvailableElement>>(
-                                future:
-                                    _equipmentApi.fetchEquipmentsNotAvialable(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return InkWell(
-                                      onTap: () => Navigator.push(
+                              child: HomeBigContainer(
+                                backgroundColor: AppColor.homePageTotalEquip,
+                                dividerColor: const Color(0xFF6ECAFA),
+                                title: 'Total Equipments',
+                                totalCount: result.length.toString(),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        TotalEquipmentPage(equipment: result),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Container()),
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => AvialableEquipmentPage(
+                                    equipment: avialableEquipment,
+                                  ),
+                                ),
+                              ),
+                              child: HomeBigContainer(
+                                backgroundColor: AppColor.green,
+                                dividerColor: const Color(0xFF78D0A5),
+                                title: 'Avialable Equipments',
+                                totalCount:
+                                    avialableEquipment.length.toString(),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => AvialableEquipmentPage(
+                                      equipment: avialableEquipment,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Container()),
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      EquipmentNotAvialablePage(
+                                    equipment: notAvialableEquipment,
+                                  ),
+                                ),
+                              ),
+                              child: HomeBigContainer(
+                                backgroundColor: AppColor.red,
+                                dividerColor: const Color(0XFFF5605F),
+                                title: 'Unavialable Equipments',
+                                totalCount:
+                                    notAvialableEquipment.length.toString(),
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        EquipmentNotAvialablePage(
+                                      equipment: notAvialableEquipment,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      GoodEquipmentPage(equipment: goodResult),
+                                ),
+                              ),
+                              child: HomeSmallContainer(
+                                borderColor: AppColor.green,
+                                buttonColor: AppColor.green,
+                                backgroundColor: const Color(0xFFEDF9F3),
+                                title: 'Good Equipments',
+                                totalCount: goodResult.isEmpty
+                                    ? '0'
+                                    : '${goodResult.length}',
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => GoodEquipmentPage(
+                                      equipment: goodResult,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Container()),
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      FairEquipmentPage(equipment: fairResult),
+                                ),
+                              ),
+                              child: HomeSmallContainer(
+                                borderColor: const Color(0xFFFFCC42),
+                                buttonColor: const Color(0xFFFFCC42),
+                                backgroundColor: const Color(0xFFFFFAEC),
+                                title: 'Fair Equipments',
+                                totalCount: fairResult.isEmpty
+                                    ? '0'
+                                    : '${fairResult.length}',
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FairEquipmentPage(
+                                      equipment: fairResult,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Expanded(child: Container()),
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      BadEquipmentPage(equipment: badResult),
+                                ),
+                              ),
+                              child: HomeSmallContainer(
+                                borderColor: const Color(0xFFF22B29),
+                                buttonColor: const Color(0xFFF22B29),
+                                backgroundColor: const Color(0xFFFEEAEA),
+                                title: 'Bad Equipments',
+                                totalCount: badResult.isEmpty
+                                    ? '0'
+                                    : '${badResult.length}',
+                                onTap: () async => {
+                                  if (badResult.length > 1)
+                                    {
+                                      // await NotificationService()
+                                      //     .notification(),
+                                      Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) =>
-                                              const EquipmentNotAvialablePage(),
-                                        ),
-                                      ),
-                                      child: HomeBigContainer(
-                                        backgroundColor: AppColor.red,
-                                        dividerColor: const Color(0XFFF5605F),
-                                        title: 'Unavialable Equipments',
-                                        totalCount:
-                                            snapshot.data!.length.toString(),
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const EquipmentNotAvialablePage(),
+                                          builder: (_) => BadEquipmentPage(
+                                            equipment: badResult,
                                           ),
                                         ),
                                       ),
-                                    );
-                                  }
-                                  return const Center();
+                                    }
+                                  else
+                                    {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (_) => BadEquipmentPage(
+                                            equipment: badResult,
+                                          ),
+                                        ),
+                                      ),
+                                    }
                                 },
                               ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 6,
-                          ),
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const GoodEquipmentPage(),
-                                  ),
-                                ),
-                                child: HomeSmallContainer(
-                                  borderColor: AppColor.green,
-                                  buttonColor: AppColor.green,
-                                  backgroundColor: const Color(0xFFEDF9F3),
-                                  title: 'Good Equipments',
-                                  totalCount: goodResult.isEmpty
-                                      ? '0'
-                                      : '${goodResult.length}',
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const GoodEquipmentPage(),
-                                    ),
-                                  ),
-                                ),
+                            )
+                          ],
+                        ),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.width / 13),
+                        Row(
+                          children: [
+                            Text(
+                              'Quick Actions',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w500,
+                                color: AppColor.primaryColor,
                               ),
-                              Expanded(child: Container()),
-                              InkWell(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const FairEquipmentPage(),
-                                  ),
-                                ),
-                                child: HomeSmallContainer(
-                                  borderColor: const Color(0xFFFFCC42),
-                                  buttonColor: const Color(0xFFFFCC42),
-                                  backgroundColor: const Color(0xFFFFFAEC),
-                                  title: 'Fair Equipments',
-                                  totalCount: fairResult.isEmpty
-                                      ? '0'
-                                      : '${fairResult.length}',
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) => const FairEquipmentPage(),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              Expanded(child: Container()),
-                              InkWell(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => const BadEquipmentPage(),
-                                  ),
-                                ),
-                                child: HomeSmallContainer(
-                                  borderColor: const Color(0xFFF22B29),
-                                  buttonColor: const Color(0xFFF22B29),
-                                  backgroundColor: const Color(0xFFFEEAEA),
-                                  title: 'Bad Equipments',
-                                  totalCount: badResult.isEmpty
-                                      ? '0'
-                                      : '${badResult.length}',
-                                  onTap: () async => {
-                                    if (badResult.length > 1)
-                                      {
-                                        await NotificationService()
-                                            .notification(),
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const BadEquipmentPage(),
-                                          ),
-                                        ),
-                                      }
-                                    else
-                                      {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) =>
-                                                const BadEquipmentPage(),
-                                          ),
-                                        ),
-                                      }
-                                  },
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                              height: MediaQuery.of(context).size.width / 13),
-                          Row(
-                            children: [
-                              Text(
-                                'Quick Actions',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColor.primaryColor,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(
-                              height: MediaQuery.of(context).size.width / 13),
-                          SizedBox(
-                            child: Column(
-                              children: [
-                                FutureBuilder<List<EquipmentsCheckin>>(
-                                  future: EquipmentCheckInAPI()
-                                      .fetchAllEquipmentCheckIn(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return InkWell(
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                const CheckInEquipmentPage(),
-                                          ),
-                                        ),
-                                        child: const HomeActivitiesContainer(
-                                          title: 'Check In Equipments',
-                                          description:
-                                              'Click to see equipments returned in past events',
-                                        ),
-                                      );
-                                    }
-                                    return const Center();
-                                  },
-                                ),
-                                const SizedBox(height: 10.0),
-                                FutureBuilder<List<EventsEquipmentCheckout>>(
-                                  future: EquipmentCheckOutAPI()
-                                      .fetchAllEquipmentCheckOut(),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.hasData) {
-                                      return InkWell(
-                                        onTap: () => Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                CheckOutEquipmentPage(
-                                              equipmentCheckout: snapshot.data,
-                                            ),
-                                          ),
-                                        ),
-                                        child: const HomeActivitiesContainer(
-                                          title: 'Check Out Equipments',
-                                          description:
-                                              'Click to see equipment yet to be returned from events',
-                                        ),
-                                      );
-                                    }
-                                    return const Center();
-                                  },
-                                ),
-                              ],
                             ),
-                          )
-                        ],
-                      ),
+                          ],
+                        ),
+                        SizedBox(
+                            height: MediaQuery.of(context).size.width / 13),
+                        SizedBox(
+                          child: Column(
+                            children: [
+                              // check in Equipment
+                              InkWell(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CheckInEquipmentPage(),
+                                  ),
+                                ),
+                                child: const HomeActivitiesContainer(
+                                  title: 'Check In Equipments',
+                                  description:
+                                      'Click to see equipments returned in past events',
+                                ),
+                              ),
+                              const SizedBox(height: 10.0),
+                              // check out Equipment
+                              InkWell(
+                                onTap: () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        const CheckOutEquipmentPage(),
+                                  ),
+                                ),
+                                child: const HomeActivitiesContainer(
+                                  title: 'Check Out Equipments',
+                                  description:
+                                      'Click to see equipment yet to be returned from events',
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      ],
                     ),
-                  ],
-                ),
-              );
-            } else {
-              return Center(
-                child: CircularProgressIndicator(color: AppColor.darkGrey),
+                  ),
+                ],
               );
             }
           },

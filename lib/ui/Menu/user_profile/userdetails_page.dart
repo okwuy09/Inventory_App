@@ -183,8 +183,8 @@ class _UserDetailsPageState extends State<UserDetailsPage> {
                         ElevatedButton(
                           onPressed: () {},
                           child: const Text('Save'),
-                          style:
-                              ElevatedButton.styleFrom(primary: AppColor.red),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColor.red),
                         ),
                       ],
                     )
