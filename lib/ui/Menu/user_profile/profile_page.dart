@@ -5,6 +5,7 @@ import 'package:viicsoft_inventory_app/component/logout_pop.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
+import 'package:viicsoft_inventory_app/ui/Menu/admin_panel.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/profile_details_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -133,31 +134,52 @@ class _ProfilePageState extends State<ProfilePage> {
                     )
                   : Container(),
               const Divider(),
-              ListTile(
-                leading: Icon(
-                  Icons.dark_mode_outlined,
-                  size: 24,
-                  color: AppColor.primaryColor,
-                ),
-                title: Text(
-                  'Dark Mode',
-                  style: style.copyWith(
-                    fontSize: 15,
-                  ),
-                ),
-                trailing: Switch(
-                  activeColor: AppColor.primaryColor,
-                  materialTapTargetSize: MaterialTapTargetSize.padded,
-                  value: status,
-                  onChanged: (value) {
-                    setState(
-                      () {
-                        status = value;
-                      },
-                    );
-                  },
-                ),
-              ),
+              provider.userData.rolesPriority == 'admin'
+                  ? ListTile(
+                      leading: Icon(
+                        Icons.settings_outlined,
+                        size: 24,
+                        color: AppColor.primaryColor,
+                      ),
+                      title: Text(
+                        'Admin Panel',
+                        style: style.copyWith(
+                          fontSize: 15,
+                        ),
+                      ),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const AdminPanel(),
+                        ),
+                      ),
+                    )
+                  : Container(),
+              // ListTile(
+              //   leading: Icon(
+              //     Icons.dark_mode_outlined,
+              //     size: 24,
+              //     color: AppColor.primaryColor,
+              //   ),
+              //   title: Text(
+              //     'Dark Mode',
+              //     style: style.copyWith(
+              //       fontSize: 15,
+              //     ),
+              //   ),
+              //   trailing: Switch(
+              //     activeColor: AppColor.primaryColor,
+              //     materialTapTargetSize: MaterialTapTargetSize.padded,
+              //     value: status,
+              //     onChanged: (value) {
+              //       setState(
+              //         () {
+              //           status = value;
+              //         },
+              //       );
+              //     },
+              //   ),
+              // ),
               ListTile(
                 leading: Icon(
                   Icons.privacy_tip,

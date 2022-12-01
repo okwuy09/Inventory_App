@@ -55,7 +55,7 @@ class _ProfileDetailPageState extends State<ProfileDetailPage> {
         ),
       ),
       body: StreamBuilder<Users>(
-          stream: provider.fetchUserProfile(context).asStream(),
+          stream: provider.fetchUserProfile().asStream(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               var result = snapshot.data!;

@@ -31,8 +31,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await Provider.of<UserData>(context, listen: false)
-          .fetchUserProfile(context);
+      await Provider.of<UserData>(context, listen: false).fetchUserProfile();
     });
     super.initState();
   }

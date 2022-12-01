@@ -237,24 +237,16 @@ class _CheckInEquipmentPageState extends State<CheckInEquipmentPage> {
                                                                     .start,
                                                             children: [
                                                               Text(
-                                                                'CheckIn Date',
+                                                                'CheckIn',
                                                                 style: style.copyWith(
-                                                                    fontSize: 8,
+                                                                    fontSize:
+                                                                        10,
                                                                     fontWeight:
                                                                         FontWeight
                                                                             .bold,
                                                                     color: AppColor
                                                                         .primaryColor),
                                                               ),
-                                                              Text(
-                                                                '${result[index].returnDatetime.day}th ${months[result[index].returnDatetime.month - 1]}, ${result[index].returnDatetime.year}',
-                                                                style: style.copyWith(
-                                                                    fontSize: 8,
-                                                                    color: AppColor
-                                                                        .darkGrey),
-                                                              ),
-                                                              const SizedBox(
-                                                                  height: 2),
                                                               RichText(
                                                                 text: TextSpan(
                                                                   text: 'By:  ',
@@ -271,6 +263,32 @@ class _CheckInEquipmentPageState extends State<CheckInEquipmentPage> {
                                                                       style: style.copyWith(
                                                                           fontSize:
                                                                               10,
+                                                                          color:
+                                                                              AppColor.darkGrey),
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                              const SizedBox(
+                                                                  height: 1),
+                                                              RichText(
+                                                                text: TextSpan(
+                                                                  text:
+                                                                      'Date:  ',
+                                                                  style: style
+                                                                      .copyWith(
+                                                                    fontSize:
+                                                                        11,
+                                                                    color: AppColor
+                                                                        .primaryColor,
+                                                                  ),
+                                                                  children: [
+                                                                    TextSpan(
+                                                                      text:
+                                                                          '${result[index].returnDatetime.day}th ${months[result[index].returnDatetime.month - 1]}, ${result[index].returnDatetime.year}',
+                                                                      style: style.copyWith(
+                                                                          fontSize:
+                                                                              9,
                                                                           color:
                                                                               AppColor.darkGrey),
                                                                     ),

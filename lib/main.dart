@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +13,6 @@ import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 import 'package:viicsoft_inventory_app/ui/event/add_event_page.dart';
 import 'package:viicsoft_inventory_app/ui/store/add_equipment_page.dart';
-import 'package:viicsoft_inventory_app/ui/Menu/user_profile/passwordresetsuccesspage.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/reset_password_page.dart';
 import 'package:viicsoft_inventory_app/ui/authentication/login_screen.dart';
 import 'package:viicsoft_inventory_app/ui/authentication/loginsignup_screen.dart';
@@ -91,8 +89,6 @@ class _MyAppState extends State<MyApp> {
         '/addItem': (context) => const AddEquipmentPage(),
         '/addevent': (context) => const AddEventPage(),
         '/resetpassword': (context) => const ResetPasswordPage(),
-        '/profileChangeSuccessPage': (context) =>
-            const ProfileChangeSuccessPage(),
         '/event': (context) => const EventsPage(),
         '/store': (context) => const StorePage(),
         '/myButtomNavigationBar': (context) => const MyButtomNavigationBar()

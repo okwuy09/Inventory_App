@@ -18,7 +18,9 @@ class Authentication with ChangeNotifier {
     try {
       isResetPassword = true;
       notifyListeners();
-      await _firebaseAuth.sendPasswordResetEmail(email: email.trim());
+      await _firebaseAuth
+          .sendPasswordResetEmail(email: email.trim())
+          .then((value) => Navigator.pop(context));
       isResetPassword = false;
       notifyListeners();
       successOperation(context);

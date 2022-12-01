@@ -5,6 +5,7 @@ import 'package:viicsoft_inventory_app/component/colors.dart';
 import 'package:viicsoft_inventory_app/component/mytextform.dart';
 import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
+import 'package:viicsoft_inventory_app/ui/authentication/forget_password.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -71,10 +72,11 @@ class _LoginState extends State<Login> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                              SizedBox(height: screensize.height * 0.05),
+                              SizedBox(height: screensize.height * 0.03),
                               MyTextForm(
                                 obscureText: false,
                                 labelText: 'Email*',
+                                autofillHints: const [AutofillHints.email],
                                 controller: _emailField,
                                 validatior: (input) =>
                                     !(input?.contains('@') ?? false)
@@ -103,10 +105,31 @@ class _LoginState extends State<Login> {
                                       });
                                     }),
                               ),
+                              SizedBox(height: screensize.height * 0.015),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: InkWell(
+                                  onTap: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const ForgotPassword(),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Password Recovery',
+                                    style: style.copyWith(
+                                      fontSize: 14,
+                                      color: AppColor.primaryColor
+                                          .withOpacity(0.8),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                        SizedBox(height: screensize.height * 0.06),
+                        SizedBox(height: screensize.height * 0.03),
                         Column(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [

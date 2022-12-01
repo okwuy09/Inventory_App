@@ -20,8 +20,19 @@ class UserData with ChangeNotifier {
   bool servicestatus = false;
   bool haspermission = false;
 
+  /// Fetch all users
+  Stream<List<Users>> fetchAllUser() {
+    var usersDoc = _firebaseStore
+        .collection('users')
+        .orderBy('date_created', descending: true)
+        .snapshots()
+        .map((snapshot) =>
+            snapshot.docs.map((doc) => Users.fromJson(doc.data())).toList());
+    return usersDoc;
+  }
+
   /// fetch user current profile
-  Future<Users> fetchUserProfile(context) async {
+  Future<Users> fetchUserProfile() async {
     var userDoc = await _firebaseStore.collection('users').doc(_user.uid).get();
     _firebaseStore
         .collection('users')
@@ -30,6 +41,36 @@ class UserData with ChangeNotifier {
         .listen((event) => userData = Users.fromJson(event.data()!));
     notifyListeners();
     return Users.fromJson(userDoc.data()!);
+  }
+
+  // delete event
+  Future deleteUser(String userId, BuildContext context) async {
+    await _firebaseStore.collection('users').doc(userId).delete().then(
+          (value) => Navigator.pop(context),
+        );
+    successOperation(context);
+    notifyListeners();
+  }
+
+  // update user profile
+  Future updateUserRole({
+    required BuildContext context,
+    required String role,
+    required String userId,
+  }) async {
+    try {
+      var _userDoc = _firebaseStore;
+      _userDoc.collection('users').doc(userId).update({
+        'roles_Priority': role,
+      });
+      notifyListeners();
+      successOperation(context);
+    } on FirebaseAuthException catch (e) {
+      return failedOperation(
+        context: context,
+        message: e.message!,
+      );
+    }
   }
 
   // Change Password
@@ -143,45 +184,4 @@ class UserData with ChangeNotifier {
       );
     }
   }
-
-  // /// apps full data
-  // bool isPosting = false;
-  // Future writePost({
-  //   required String writeUp,
-  //   required BuildContext context,
-  //   required String location,
-  //   required bool isAnonymous,
-  //   required String incidentType,
-  //   List<File>? avarter,
-  //   XFile? camImage,
-  // }) async {
-  //   try {
-  //     isPosting = true;
-  //     notifyListeners();
-  //     List images = [];
-
-  //     // if the conditions are through upload picture from
-  //     // camera and post else send post without image
-  //     if (avarter!.isEmpty && camImage != null) {
-  //       var file = File(camImage.path);
-  //       var snapshot = await _firebaseStorage
-  //           .ref()
-  //           .child('PostImages/${camImage.path}')
-  //           .putFile(file);
-
-  //       var downloadUrl = await snapshot.ref.getDownloadURL();
-  //       images.add(downloadUrl);
-  //     } else {
-  //       for (var img in avarter) {
-  //         var snapshot = _firebaseStorage
-  //             .ref()
-  //             .child('PostImages/${paths.basename(img.path)}');
-  //         await snapshot.putFile(img).whenComplete(() async {
-  //           var downloadUrl = await snapshot.getDownloadURL();
-  //           images.add(downloadUrl);
-  //         });
-  //       }
-  //     }
-  //   } on FirebaseAuthException catch (e) {}
-  // }
 }

@@ -97,6 +97,7 @@ class _SignupPageState extends State<SignupPage> {
                           MyTextForm(
                             controller: _emailField,
                             obscureText: false,
+                            autofillHints: const [AutofillHints.email],
                             labelText: 'Email*',
                             keyboardType: TextInputType.emailAddress,
                             validatior: (input) => !(input!.isNotEmpty &&
