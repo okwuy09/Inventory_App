@@ -24,6 +24,7 @@ class _AdminPanelState extends State<AdminPanel> {
     var screensize = MediaQuery.of(context).size;
     var provider = Provider.of<UserData>(context);
     return Scaffold(
+      //backgroundColor: AppColor.lightGrey.withOpacity(0.5),
       body: Padding(
         padding: const EdgeInsets.only(left: 15.0, right: 15.0, top: 50),
         child: StreamBuilder<List<Users>>(
@@ -64,7 +65,7 @@ class _AdminPanelState extends State<AdminPanel> {
                     children: [
                       Expanded(
                         child: Container(
-                          height: 70,
+                          height: 80,
                           width: screensize.width / 2.5,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -81,6 +82,10 @@ class _AdminPanelState extends State<AdminPanel> {
                                   color: AppColor.white,
                                 ),
                               ),
+                              Divider(
+                                thickness: 1,
+                                color: AppColor.lightGrey.withOpacity(0.5),
+                              ),
                               Text(
                                 'Total Users',
                                 style: style.copyWith(
@@ -95,7 +100,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          height: 70,
+                          height: 80,
                           width: screensize.width / 2.5,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -112,6 +117,10 @@ class _AdminPanelState extends State<AdminPanel> {
                                   color: AppColor.white,
                                 ),
                               ),
+                              Divider(
+                                thickness: 1,
+                                color: AppColor.lightGrey.withOpacity(0.5),
+                              ),
                               Text(
                                 'Users',
                                 style: style.copyWith(
@@ -126,7 +135,7 @@ class _AdminPanelState extends State<AdminPanel> {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          height: 70,
+                          height: 80,
                           width: screensize.width / 2.5,
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
@@ -143,6 +152,10 @@ class _AdminPanelState extends State<AdminPanel> {
                                   color: AppColor.white,
                                 ),
                               ),
+                              Divider(
+                                thickness: 1,
+                                color: AppColor.lightGrey.withOpacity(0.5),
+                              ),
                               Text(
                                 'Admin',
                                 style: style.copyWith(
@@ -158,7 +171,7 @@ class _AdminPanelState extends State<AdminPanel> {
                   ),
                   SizedBox(height: screensize.height / 30),
                   Text(
-                    'User Details',
+                    'Users',
                     style: style.copyWith(
                       fontWeight: FontWeight.bold,
                     ),
@@ -173,18 +186,19 @@ class _AdminPanelState extends State<AdminPanel> {
                         itemBuilder: ((context, index) {
                           return Container(
                             height: 65,
+                            margin: const EdgeInsets.only(bottom: 8),
                             padding: EdgeInsets.symmetric(
                                 horizontal: screensize.width / 50),
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 0.5,
-                                color: AppColor.primaryColor.withOpacity(0.6),
-                              ),
-                            ),
+                            decoration: BoxDecoration(color: AppColor.white
+                                // border: Border.all(
+                                //   width: 0.5,
+                                //   color: AppColor.primaryColor.withOpacity(0.6),
+                                // ),
+                                ),
                             child: Row(
                               children: [
                                 Expanded(
-                                  flex: 3,
+                                  flex: 2,
                                   child: Text(
                                     users[index].fullName!,
                                     style: style.copyWith(
@@ -194,17 +208,10 @@ class _AdminPanelState extends State<AdminPanel> {
                                   ),
                                 ),
                                 const SizedBox(width: 10),
-                                Container(
-                                  height: 65,
-                                  width: 0.5,
-                                  color: AppColor.primaryColor,
-                                ),
-                                const SizedBox(width: 10),
                                 Expanded(
-                                  flex: 2,
                                   child: DropdownButtonHideUnderline(
                                     child: DropdownButton<String>(
-                                      dropdownColor: AppColor.primaryColor,
+                                      dropdownColor: AppColor.white,
                                       borderRadius: BorderRadius.circular(8),
                                       value: users[index].rolesPriority,
                                       onChanged: (newValue) async {
@@ -238,12 +245,6 @@ class _AdminPanelState extends State<AdminPanel> {
                                       }).toList(),
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 10),
-                                Container(
-                                  height: 65,
-                                  width: 0.5,
-                                  color: AppColor.primaryColor,
                                 ),
                                 const SizedBox(width: 10),
                                 InkWell(

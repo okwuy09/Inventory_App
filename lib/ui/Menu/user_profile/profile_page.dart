@@ -6,6 +6,7 @@ import 'package:viicsoft_inventory_app/component/style.dart';
 import 'package:viicsoft_inventory_app/services/provider/authentication.dart';
 import 'package:viicsoft_inventory_app/services/provider/userdata.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/admin_panel.dart';
+import 'package:viicsoft_inventory_app/ui/Menu/privacy_policy.dart';
 import 'package:viicsoft_inventory_app/ui/Menu/user_profile/profile_details_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -192,7 +193,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     fontSize: 15,
                   ),
                 ),
-                onTap: () {},
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const PrivacyPolicy(),
+                  ),
+                ),
               ),
               const Divider(),
               SizedBox(height: screensize.height * 0.08),
