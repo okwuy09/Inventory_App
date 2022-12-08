@@ -19,8 +19,6 @@ class _CheckOutEquipmentPageState extends State<CheckOutEquipmentPage> {
   @override
   Widget build(BuildContext context) {
     var provider = Provider.of<AppData>(context);
-
-    ///var priority = Provider.of<UserData>(context).userData.rolesPriority;
     return Scaffold(
       backgroundColor: AppColor.homePageColor,
       appBar: AppBar(

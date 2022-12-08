@@ -5,7 +5,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK" />
    <application
-        android:label="Inventory"
+        android:label="Akive"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

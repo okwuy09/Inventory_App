@@ -39,8 +39,23 @@ class _SignupLoginState extends State<SignupLogin> {
                               Radius.elliptical(250, 200)),
                         ),
                         child: Center(
-                          child: Image.asset('assets/Logo.png',
-                              width: 195, height: 63),
+                          child: Stack(
+                            children: [
+                              Image.asset(
+                                'assets/Logo.png',
+                                width: 140,
+                                height: 60,
+                              ),
+                              Positioned(
+                                child: Container(
+                                  color:
+                                      AppColor.primaryColor.withOpacity(0.15),
+                                  width: 140,
+                                  height: 60,
+                                ),
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ],

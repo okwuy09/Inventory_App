@@ -38,16 +38,28 @@ class _LoginState extends State<Login> {
                 child: Column(
                   children: [
                     Container(
-                        width: screensize.width,
-                        color: AppColor.primaryColor,
-                        height: screensize.height / 2.5,
-                        child: Center(
-                            child: Image.asset(
-                          'assets/Logo.png',
-                          color: AppColor.white.withOpacity(0.6),
-                          width: 195,
-                          height: 69,
-                        ))),
+                      width: screensize.width,
+                      color: AppColor.primaryColor,
+                      height: screensize.height / 2.5,
+                      child: Center(
+                        child: Stack(
+                          children: [
+                            Image.asset(
+                              'assets/Logo.png',
+                              width: 135,
+                              height: 60,
+                            ),
+                            Positioned(
+                              child: Container(
+                                color: AppColor.primaryColor.withOpacity(0.4),
+                                width: 135,
+                                height: 60,
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 30.0),
                     Column(
                       children: [

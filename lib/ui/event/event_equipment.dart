@@ -319,24 +319,24 @@ class _EventsEquipmentState extends State<EventsEquipment> {
                                                                             children: [
                                                                               Text('${result[index].equipmentName} Checked In and Barcode Scanned'),
                                                                               const SizedBox(height: 18),
-                                                                              const Divider(),
-                                                                              Padding(
-                                                                                padding: const EdgeInsets.only(top: 20, bottom: 20),
-                                                                                child: Row(
-                                                                                  children: [
-                                                                                    Text(
-                                                                                      'By Alber Obiefuna',
-                                                                                      style: style.copyWith(fontSize: 12, color: AppColor.darkGrey),
-                                                                                    ),
-                                                                                    Expanded(child: Container()),
-                                                                                    Text(
-                                                                                      '',
-                                                                                      //'${result[index].event.checkInDate.day} - ${result[index].event.checkInDate.month}-${result[index].event.checkInDate.year}',
-                                                                                      style: style.copyWith(fontSize: 12, color: AppColor.darkGrey),
-                                                                                    )
-                                                                                  ],
-                                                                                ),
-                                                                              )
+                                                                              // const Divider(),
+                                                                              // Padding(
+                                                                              //   padding: const EdgeInsets.only(top: 20, bottom: 20),
+                                                                              //   child: Row(
+                                                                              //     children: [
+                                                                              //       Text(
+                                                                              //         'By Alber Obiefuna',
+                                                                              //         style: style.copyWith(fontSize: 12, color: AppColor.darkGrey),
+                                                                              //       ),
+                                                                              //       Expanded(child: Container()),
+                                                                              //       Text(
+                                                                              //         '',
+                                                                              //         //'${result[index].event.checkInDate.day} - ${result[index].event.checkInDate.month}-${result[index].event.checkInDate.year}',
+                                                                              //         style: style.copyWith(fontSize: 12, color: AppColor.darkGrey),
+                                                                              //       )
+                                                                              //     ],
+                                                                              //   ),
+                                                                              // )
                                                                             ],
                                                                           ),
                                                                         );
