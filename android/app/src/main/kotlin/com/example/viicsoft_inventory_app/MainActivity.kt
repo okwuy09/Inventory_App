@@ -1,4 +1,4 @@
-package com.example.viicsoft_inventory_app
+package com.akive.app
 
 import io.flutter.embedding.android.FlutterActivity
 

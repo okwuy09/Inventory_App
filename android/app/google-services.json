@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:597345318726:android:e3e7d12f7090fa0759d747",
+        "mobilesdk_app_id": "1:597345318726:android:c548e9d8fa87e57259d747",
         "android_client_info": {
-          "package_name": "com.example.viicsoft_inventory_app"
+          "package_name": "com.akive.app"
         }
       },
       "oauth_client": [
@@ -29,6 +29,13 @@
             {
               "client_id": "597345318726-2jjq8005svq50qqcsv48epdb1rimrn9e.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "597345318726-qm6fs68apn8iaqghi6vo3r258rj6lpc3.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.viicsoftInventoryApp"
+              }
             }
           ]
         }

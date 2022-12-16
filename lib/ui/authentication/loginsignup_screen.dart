@@ -7,7 +7,6 @@ import 'package:viicsoft_inventory_app/ui/authentication/signup_screen.dart';
 
 class SignupLogin extends StatefulWidget {
   const SignupLogin({Key? key}) : super(key: key);
-
   @override
   _SignupLoginState createState() => _SignupLoginState();
 }

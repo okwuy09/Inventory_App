@@ -48,17 +48,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDl8SI9znTEKEiM8PdIg0gNjymCf2MXHyo',
-    appId: '1:597345318726:web:f1a2c0b7bda6b77059d747',
+    appId: '1:597345318726:web:9904877cb9ad022259d747',
     messagingSenderId: '597345318726',
     projectId: 'inventory-application-57275',
     authDomain: 'inventory-application-57275.firebaseapp.com',
     storageBucket: 'inventory-application-57275.appspot.com',
-    measurementId: 'G-YSEEB5TBGB',
+    measurementId: 'G-P0N89LBKJS',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCQ8xBnN35u6fuR66OOsh0acGaJCJmRJps',
-    appId: '1:597345318726:android:e3e7d12f7090fa0759d747',
+    appId: '1:597345318726:android:c548e9d8fa87e57259d747',
     messagingSenderId: '597345318726',
     projectId: 'inventory-application-57275',
     storageBucket: 'inventory-application-57275.appspot.com',
@@ -66,11 +66,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyD_HA8jhqiFQdcbNjIzuQkaZ07nSKlz0H8',
-    appId: '1:597345318726:ios:5c9a8b3cc4e174c359d747',
+    appId: '1:597345318726:ios:a8b3d6f8418c9f7a59d747',
     messagingSenderId: '597345318726',
     projectId: 'inventory-application-57275',
     storageBucket: 'inventory-application-57275.appspot.com',
-    iosClientId: '597345318726-qm6fs68apn8iaqghi6vo3r258rj6lpc3.apps.googleusercontent.com',
-    iosBundleId: 'com.example.viicsoftInventoryApp',
+    iosClientId: '597345318726-lhv10hhahin30riu68f2nqk693313r6f.apps.googleusercontent.com',
+    iosBundleId: 'com.akive.app',
   );
 }
